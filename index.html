@@ -193,153 +193,108 @@ body::after {
 .btn-ghost { background:transparent; color:var(--cream); border:1px solid rgba(244,240,232,.38); letter-spacing:.22em; }
 .btn-ghost:hover { border-color:rgba(244,240,232,.85); background:rgba(244,240,232,.05); }
 
-/* ─────────── HERO SCROLL SCRUB ─────────── */
-.hero-scrub {
-  position:relative;
-  height:500vh;
-  background:var(--ink);
+/* ─────────── HERO ─────────── */
+.hero {
+  position:relative; height:100svh; min-height:640px;
+  overflow:hidden; color:var(--cream); background:#040404;
 }
-.hero-scrub__sticky {
-  position:sticky;
-  top:0;
-  height:100vh;
-  overflow:hidden;
-  color:var(--cream);
+.hero__media {
+  position:absolute; inset:0; z-index:0;
 }
-/* Gold rule at foot of sticky panel */
-.hero-scrub__sticky::after {
-  content:""; position:absolute; bottom:0; left:0; right:0;
-  height:2px; background:var(--gold); z-index:6;
+.hero__media img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center 35%;
+  transform:scale(1.07);
+  animation:hZoom 20s ease-out forwards;
+  filter:contrast(1.08) saturate(1.18) brightness(0.78);
 }
-/* Canvas fills sticky viewport — sized to cover via JS */
-.hero-scrub__canvas {
-  position:absolute;
-  top:0; left:0;
-  z-index:0;
-}
-/* Cinematic overlay: solid bottom-left text zone, open right */
-.hero-scrub__cin {
+@keyframes hZoom { from{transform:scale(1.07)} to{transform:scale(1.00)} }
+/* Cinematic overlay: heavy left text zone, light right */
+.hero__cin {
   position:absolute; inset:0; z-index:2; pointer-events:none;
   background:
     linear-gradient(to bottom,
-      rgba(4,4,4,.65) 0%,
-      rgba(4,4,4,.02) 26%,
-      rgba(4,4,4,.72) 58%,
-      rgba(4,4,4,.97) 100%
+      rgba(4,4,4,.72) 0%,
+      rgba(4,4,4,.06) 28%,
+      rgba(4,4,4,.82) 62%,
+      rgba(4,4,4,.98) 100%
     ),
     linear-gradient(96deg,
-      rgba(4,4,4,.95) 0%,
-      rgba(4,4,4,.88) 26%,
-      rgba(4,4,4,.50) 44%,
-      rgba(4,4,4,.10) 62%,
+      rgba(4,4,4,.96) 0%,
+      rgba(4,4,4,.90) 26%,
+      rgba(4,4,4,.56) 44%,
+      rgba(4,4,4,.16) 62%,
       transparent 100%
     );
 }
-/* Vertical side label */
-.hero-scrub__side {
+/* Text-protection radial behind body */
+.hero__body::before {
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(ellipse 90% 120% at 0% 100%,rgba(4,4,4,.68) 0%,rgba(4,4,4,.32) 52%,transparent 100%);
+}
+/* Gold rule */
+.hero::after {
+  content:""; position:absolute; bottom:0; left:0; right:0;
+  height:2px; background:var(--gold); z-index:6;
+}
+/* Content zone — bottom-anchored */
+.hero__body {
+  position:absolute; bottom:0; left:0; right:0; z-index:4;
+  padding:clamp(32px,5vw,56px) var(--gutter) clamp(36px,5.5vw,68px);
+  max-width:62%;
+}
+/* Side column */
+.hero__side {
   position:absolute; right:var(--gutter); top:50%; z-index:5;
   transform:translateY(-50%);
   display:flex; flex-direction:column; align-items:center; gap:18px;
 }
-.hero-scrub__side-rule {
-  width:1px; height:clamp(40px,6vw,72px);
-  background:rgba(244,240,232,.20);
-}
-.hero-scrub__side-text {
+.hero__side-rule { width:1px; height:clamp(40px,6vw,72px); background:rgba(244,240,232,.20); }
+.hero__side-text {
   font-family:var(--fm); font-size:9px; letter-spacing:.3em; text-transform:uppercase;
   color:rgba(244,240,232,.78);
   writing-mode:vertical-rl; transform:rotate(180deg);
   white-space:nowrap; line-height:1;
 }
-@media (max-width:768px){ .hero-scrub__side { display:none; } }
-
-/* Copy segments — all stacked at bottom-left, fade in/out by frame */
-.hero-scrub__seg {
-  position:absolute;
-  bottom:clamp(36px,5.5vw,68px);
-  left:var(--gutter);
-  z-index:4;
-  max-width:65%;
-  opacity:0;
-  transform:translateY(14px);
-  transition:opacity .7s var(--e), transform .7s var(--e);
-  pointer-events:none;
-}
-.hero-scrub__seg.visible {
-  opacity:1;
-  transform:translateY(0);
-  pointer-events:auto;
-}
-.hero-scrub__eyebrow {
-  font-family:var(--fm); font-size:9px; letter-spacing:.3em; text-transform:uppercase;
-  color:var(--blush); margin-bottom:18px;
-}
-.hero-scrub__h1 {
+@media (max-width:768px){ .hero__side { display:none; } }
+/* Headline */
+.hero__h1 {
   font-family:var(--fd); font-style:italic; font-weight:300;
-  font-size:clamp(68px,11.5vw,190px); line-height:.87; letter-spacing:-.048em;
-  color:#fff; margin-bottom:clamp(22px,3vw,40px);
+  font-size:clamp(72px,12.5vw,210px); line-height:.86; letter-spacing:-.048em;
+  margin-bottom:clamp(28px,3.8vw,48px); color:#fff;
 }
-.hero-scrub__h1 em { color:var(--blush); font-style:italic; }
-.hero-scrub__cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:clamp(18px,2.5vw,32px); }
-/* Shade dots row */
-.hero-scrub__shades { display:flex; align-items:center; gap:6px; opacity:.72; }
-.hero-scrub__dot {
+.hero__line { display:block; overflow:hidden; }
+.hero__line-inner { display:block; transform:translateY(110%); }
+.hero__h1 em { color:var(--blush); font-style:italic; }
+/* CTA row */
+.hero__cta-mask { overflow:hidden; margin-bottom:clamp(20px,2.8vw,36px); }
+.hero__cta-inner { display:flex; gap:12px; flex-wrap:wrap; align-items:center; transform:translateY(110%); }
+/* Shade dots */
+.hero__shades { display:flex; align-items:center; gap:6px; opacity:.72; }
+.hero__dot {
   width:11px; height:11px; border-radius:50%;
   border:1px solid rgba(255,255,255,.14); display:inline-block;
-  cursor:none;
+  transform:scale(0); cursor:none;
+  transition:border-color .25s;
+}
+.hero__dot:hover {
+  transform:scale(1.5) !important;
   transition:transform .25s cubic-bezier(0.34,1.56,0.64,1), border-color .25s;
+  border-color:rgba(255,255,255,.55);
 }
-.hero-scrub__dot:hover { transform:scale(1.5); border-color:rgba(255,255,255,.55); }
-@media (pointer:coarse){ .hero-scrub__dot { cursor:pointer; } }
-.hero-scrub__dot-more {
+@media (pointer:coarse){ .hero__dot { cursor:pointer; } }
+.hero__dot-more {
   font-family:var(--fm); font-size:9px; letter-spacing:.15em;
-  color:rgba(244,240,232,.55); margin-left:6px;
+  color:rgba(244,240,232,.55); margin-left:6px; opacity:0;
 }
-/* Progress indicator bottom-right */
-.hero-scrub__progress {
-  position:absolute;
-  right:var(--gutter); bottom:clamp(40px,6vw,72px);
-  display:flex; gap:8px; z-index:5;
-}
-.hero-scrub__prog-dot {
-  width:5px; height:5px; border-radius:50%;
-  background:rgba(244,240,232,.2);
-  transition:background .4s var(--e), transform .4s var(--e);
-}
-.hero-scrub__prog-dot.active {
-  background:var(--blush); transform:scale(1.6);
-}
-/* Animated scroll nudge — vertical line pulse */
-.hero-scrub__scroll-hint {
-  position:absolute;
-  bottom:clamp(20px,3vw,36px); left:50%; z-index:5;
-  transform:translateX(-50%);
-  font-family:var(--fm); font-size:9px; letter-spacing:.28em; text-transform:uppercase;
-  color:rgba(244,240,232,.28);
-  display:flex; flex-direction:column; align-items:center; gap:9px;
-  transition:opacity .5s var(--e);
-}
-.hero-scrub__scroll-hint::after {
-  content:""; width:1px; height:30px;
-  background:rgba(244,240,232,.2);
-  animation:shPulse 1.9s ease-in-out infinite;
-}
-@keyframes shPulse {
-  0%   { transform:scaleY(0); transform-origin:top;    }
-  49%  { transform:scaleY(1); transform-origin:top;    }
-  50%  { transform:scaleY(1); transform-origin:bottom; }
-  100% { transform:scaleY(0); transform-origin:bottom; }
-}
-.hero-scrub__scroll-hint.hidden { opacity:0; pointer-events:none; }
 @media (max-width:900px){
-  .hero-scrub__seg  { max-width:100%; }
-  .hero-scrub__h1   { font-size:clamp(52px,13vw,96px); }
+  .hero__body { max-width:100%; }
+  .hero__h1 { font-size:clamp(56px,14vw,100px); }
 }
 @media (max-width:640px){
-  .hero-scrub__h1     { font-size:clamp(42px,12vw,72px); line-height:.9; }
-  .hero-scrub__shades { gap:5px; flex-wrap:wrap; max-width:88vw; }
-  .hero-scrub__dot    { width:10px; height:10px; }
-  .hero-scrub__progress { display:none; }
+  .hero__h1 { font-size:clamp(44px,13vw,68px); line-height:.9; }
+  .hero__shades { gap:5px; flex-wrap:wrap; max-width:88vw; }
+  .hero__dot { width:10px; height:10px; }
 }
 
 /* ─────────── MARQUEE ─────────── */
@@ -737,122 +692,6 @@ body::after {
   .hero__dot  { width:10px; height:10px; }
 }
 
-/* ─────────── CANVAS SCROLL SCRUB ─────────── */
-.scrub {
-  position:relative;
-  height:380vh;
-  background:var(--ink);
-}
-.scrub__sticky {
-  position:sticky;
-  top:0;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-.scrub__canvas {
-  display:block;
-  position:relative;
-  z-index:1;
-}
-.scrub__overlay {
-  position:absolute;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-}
-.scrub__copy {
-  position:absolute;
-  bottom:clamp(52px,8vw,100px);
-  left:var(--gutter);
-  opacity:0;
-  transform:translateY(18px);
-  transition:opacity .65s var(--e), transform .65s var(--e);
-}
-.scrub__copy.visible {
-  opacity:1;
-  transform:translateY(0);
-}
-.scrub__kicker {
-  font-family:var(--fm);
-  font-size:9px;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:var(--blush);
-  margin-bottom:14px;
-}
-.scrub__h2 {
-  font-family:var(--fd);
-  font-style:italic;
-  font-weight:300;
-  font-size:clamp(40px,6vw,96px);
-  line-height:.9;
-  letter-spacing:-.04em;
-  color:var(--cream);
-}
-.scrub__h2 em { color:var(--blush); font-style:italic; }
-.scrub__frame-n {
-  position:absolute;
-  right:var(--gutter);
-  bottom:clamp(52px,8vw,100px);
-  font-family:var(--fm);
-  font-size:10px;
-  letter-spacing:.12em;
-  color:rgba(244,240,232,.2);
-  font-variant-numeric:tabular-nums;
-}
-.scrub__progress {
-  position:absolute;
-  right:var(--gutter);
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-.scrub__prog-dot {
-  width:5px; height:5px;
-  border-radius:50%;
-  background:rgba(244,240,232,.2);
-  transition:background .4s var(--e), transform .4s var(--e);
-}
-.scrub__prog-dot.active {
-  background:var(--blush);
-  transform:scale(1.6);
-}
-/* scroll hint line at top of scrub section */
-.scrub__hint {
-  position:absolute;
-  top:clamp(52px,7vw,80px);
-  left:50%;
-  transform:translateX(-50%);
-  font-family:var(--fm);
-  font-size:9px;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  color:rgba(244,240,232,.3);
-  display:flex;
-  align-items:center;
-  gap:10px;
-  opacity:1;
-  transition:opacity .5s var(--e);
-}
-.scrub__hint::before,
-.scrub__hint::after {
-  content:"";
-  width:24px; height:1px;
-  background:rgba(244,240,232,.18);
-}
-.scrub__hint.hidden { opacity:0; }
-@media (pointer:coarse) {
-  .scrub__progress, .scrub__frame-n { display:none; }
-}
-@media (max-width:640px){
-  .scrub__h2 { font-size:clamp(30px,9vw,52px); }
-  .scrub__copy { bottom:clamp(36px,6vw,60px); }
-}
 </style>
 </head>
 <body>
@@ -898,70 +737,45 @@ body::after {
   </div>
 </header>
 
-<!-- ══════════ HERO SCROLL SCRUB ══════════ -->
-<section class="hero-scrub" id="hero">
-  <div class="hero-scrub__sticky">
+<!-- ══════════ HERO ══════════ -->
+<section class="hero" id="hero">
+  <div class="hero__media">
+    <img src="assets/lifestyle/salon.jpg" alt="" fetchpriority="high">
+  </div>
+  <div class="hero__cin"></div>
 
-    <!-- Canvas: cover-fill via JS -->
-    <canvas class="hero-scrub__canvas js-hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero__side">
+    <div class="hero__side-rule"></div>
+    <div class="hero__side-text">Vegan &nbsp;·&nbsp; Long-wear &nbsp;·&nbsp; 13 Shades</div>
+    <div class="hero__side-rule"></div>
+  </div>
 
-    <!-- Cinematic overlay gradient -->
-    <div class="hero-scrub__cin"></div>
-
-    <!-- Vertical side label -->
-    <div class="hero-scrub__side">
-      <div class="hero-scrub__side-rule"></div>
-      <div class="hero-scrub__side-text">Vegan &nbsp;·&nbsp; Long-wear &nbsp;·&nbsp; 13 Shades</div>
-      <div class="hero-scrub__side-rule"></div>
-    </div>
-
-    <!-- Segment 1: Brand reveal (frames 0–75) -->
-    <div class="hero-scrub__seg js-hero-seg" data-f0="0" data-f1="75">
-      <div class="hero-scrub__eyebrow">Issue No. 01 · The Color Issue · April 2026</div>
-      <h1 class="hero-scrub__h1">Pretty<br><em>Ink.</em></h1>
-    </div>
-
-    <!-- Segment 2: Product promise (frames 88–162) -->
-    <div class="hero-scrub__seg js-hero-seg" data-f0="88" data-f1="162">
-      <div class="hero-scrub__eyebrow">13 shades · Vegan · Made in Pontiac</div>
-      <h1 class="hero-scrub__h1">Leave your<br><em>mark.</em></h1>
-    </div>
-
-    <!-- Segment 3: CTA (frames 175–241) -->
-    <div class="hero-scrub__seg js-hero-seg" data-f0="175" data-f1="241">
-      <div class="hero-scrub__eyebrow">Vegan · Cruelty-Free · Three-week wear</div>
-      <h1 class="hero-scrub__h1" style="font-size:clamp(48px,8.5vw,138px)">Your color<br><em>is waiting.</em></h1>
-      <div class="hero-scrub__cta">
+  <div class="hero__body">
+    <h1 class="hero__h1">
+      <span class="hero__line"><span class="hero__line-inner">Leave your</span></span>
+      <span class="hero__line"><span class="hero__line-inner"><em>mark.</em></span></span>
+    </h1>
+    <div class="hero__cta-mask">
+      <div class="hero__cta-inner">
         <a href="shop.html" class="btn btn-ghost">Shop the ink →</a>
       </div>
-      <div class="hero-scrub__shades">
-        <span class="hero-scrub__dot" style="background:#c94040"></span>
-        <span class="hero-scrub__dot" style="background:#7b3157"></span>
-        <span class="hero-scrub__dot" style="background:#e84a7b"></span>
-        <span class="hero-scrub__dot" style="background:#e8b4b0"></span>
-        <span class="hero-scrub__dot" style="background:#f0ece2;border-color:rgba(255,255,255,.35)"></span>
-        <span class="hero-scrub__dot" style="background:#d4813a"></span>
-        <span class="hero-scrub__dot" style="background:#f7d32c"></span>
-        <span class="hero-scrub__dot" style="background:#3ab85a"></span>
-        <span class="hero-scrub__dot" style="background:#3bb8c4"></span>
-        <span class="hero-scrub__dot" style="background:#1f3b80"></span>
-        <span class="hero-scrub__dot" style="background:#6e3d8a"></span>
-        <span class="hero-scrub__dot" style="background:#4a2216"></span>
-        <span class="hero-scrub__dot" style="background:#2d2d2d"></span>
-        <span class="hero-scrub__dot-more">13 shades · from $14</span>
-      </div>
     </div>
-
-    <!-- Segment progress dots -->
-    <div class="hero-scrub__progress" aria-hidden="true">
-      <span class="hero-scrub__prog-dot js-hero-dot active"></span>
-      <span class="hero-scrub__prog-dot js-hero-dot"></span>
-      <span class="hero-scrub__prog-dot js-hero-dot"></span>
+    <div class="hero__shades">
+      <span class="hero__dot" style="background:#c94040"></span>
+      <span class="hero__dot" style="background:#7b3157"></span>
+      <span class="hero__dot" style="background:#e84a7b"></span>
+      <span class="hero__dot" style="background:#e8b4b0"></span>
+      <span class="hero__dot" style="background:#f0ece2;border-color:rgba(255,255,255,.35)"></span>
+      <span class="hero__dot" style="background:#d4813a"></span>
+      <span class="hero__dot" style="background:#f7d32c"></span>
+      <span class="hero__dot" style="background:#3ab85a"></span>
+      <span class="hero__dot" style="background:#3bb8c4"></span>
+      <span class="hero__dot" style="background:#1f3b80"></span>
+      <span class="hero__dot" style="background:#6e3d8a"></span>
+      <span class="hero__dot" style="background:#4a2216"></span>
+      <span class="hero__dot" style="background:#2d2d2d"></span>
+      <span class="hero__dot-more">13 shades · from $14</span>
     </div>
-
-    <!-- Scroll nudge fades after first few frames -->
-    <div class="hero-scrub__scroll-hint js-hero-hint">Scroll</div>
-
   </div>
 </section>
 
@@ -1160,37 +974,6 @@ body::after {
 
 </section>
 
-<!-- ══════════ PRODUCT SCRUB ══════════ -->
-<section class="scrub" id="product-scrub" aria-label="Product in motion">
-  <div class="scrub__sticky">
-    <canvas class="scrub__canvas js-scrub-canvas" aria-hidden="true" width="960" height="540"></canvas>
-    <div class="scrub__overlay">
-      <div class="scrub__hint js-scrub-hint">Scroll to explore</div>
-      <!-- Segment 1: opening frames -->
-      <div class="scrub__copy js-scrub-copy" data-f0="0" data-f1="42">
-        <div class="scrub__kicker">The Formula</div>
-        <h2 class="scrub__h2">Pure pigment.<br><em>Perfect glide.</em></h2>
-      </div>
-      <!-- Segment 2: application -->
-      <div class="scrub__copy js-scrub-copy" data-f0="55" data-f1="98">
-        <div class="scrub__kicker">Three coats</div>
-        <h2 class="scrub__h2">Three weeks<br><em>of life.</em></h2>
-      </div>
-      <!-- Segment 3: finish -->
-      <div class="scrub__copy js-scrub-copy" data-f0="108" data-f1="143">
-        <div class="scrub__kicker">No-wipe finish</div>
-        <h2 class="scrub__h2">Drop the<br><em>acetone.</em></h2>
-      </div>
-    </div>
-    <div class="scrub__frame-n js-scrub-n" aria-hidden="true">01/144</div>
-    <div class="scrub__progress" aria-hidden="true">
-      <span class="scrub__prog-dot js-scrub-dot"></span>
-      <span class="scrub__prog-dot js-scrub-dot"></span>
-      <span class="scrub__prog-dot js-scrub-dot"></span>
-    </div>
-  </div>
-</section>
-
 <!-- PILLARS -->
 <section class="pillars">
   <div class="pillars__grid">
@@ -1315,13 +1098,8 @@ function tick(){
 tick(); setInterval(tick,1000);
 
 /* ── MASTHEAD SCROLL ── */
-/* Stay "open" dark while the hero scrub canvas is the dominant visual */
-const mast     = document.querySelector('.js-mast');
-const heroSect = document.querySelector('#hero');
-window.addEventListener('scroll',()=>{
-  const threshold = heroSect ? heroSect.offsetHeight - window.innerHeight * 0.6 : 60;
-  mast?.classList.toggle('scrolled', window.scrollY > threshold);
-},{passive:true});
+const mast = document.querySelector('.js-mast');
+window.addEventListener('scroll',()=>{ mast?.classList.toggle('scrolled',window.scrollY>60); },{passive:true});
 
 /* ── CURSOR ── */
 const dot=document.querySelector('.js-dot');
@@ -1339,7 +1117,7 @@ if(!coarse && dot && ring && glow){
     glow.style.transform=`translate3d(${gx}px,${gy}px,0)`;
     requestAnimationFrame(loop);
   })();
-  document.querySelectorAll('a,button,input,.card,.sig__img,.hero-scrub__dot').forEach(el=>{
+  document.querySelectorAll('a,button,input,.card,.sig__img').forEach(el=>{
     el.addEventListener('mouseenter',()=>ring.classList.add('on'));
     el.addEventListener('mouseleave',()=>ring.classList.remove('on'));
   });
@@ -1388,186 +1166,36 @@ function initScroll(){
   ScrollTrigger.refresh();
 }
 
-/* ── HERO SCROLL SCRUB ── */
-function initHeroScrub(){
-  const section = document.querySelector('#hero');
-  const canvas  = document.querySelector('.js-hero-canvas');
-  if(!section || !canvas || reduced) return;
+/* ── HERO ENTRANCE — masked line reveal + elastic dots ── */
+function initHeroEntrance(){
+  const lines = document.querySelectorAll('.hero__line-inner');
+  const cta   = document.querySelector('.hero__cta-inner');
+  const dots  = document.querySelectorAll('.hero__dot');
+  const label = document.querySelector('.hero__dot-more');
 
-  const ctx   = canvas.getContext('2d');
-  const TOTAL = 241; // hero.mp4 at 15fps = 241 frames
-  const frames = [];
-  let loopActive = false;
-
-  /* Size canvas to cover full viewport */
-  function sizeCanvas(){
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', sizeCanvas, {passive:true});
-  sizeCanvas();
-
-  /* Preload all frames */
-  for(let i = 1; i <= TOTAL; i++){
-    const img = new Image();
-    img.src = `assets/hero-frames/frame_${String(i).padStart(4,'0')}.webp`;
-    frames.push(img);
+  if(reduced || typeof gsap==='undefined'){
+    [...lines].forEach(el=>{ if(el){ el.style.transform='translateY(0)'; } });
+    if(cta)   cta.style.transform='translateY(0)';
+    dots.forEach(d=>{ d.style.transform='scale(1)'; });
+    if(label) label.style.opacity='1';
+    return;
   }
 
-  /* Overlays */
-  const segs = Array.from(document.querySelectorAll('.js-hero-seg'));
-  const dots = Array.from(document.querySelectorAll('.js-hero-dot'));
-  const hint = document.querySelector('.js-hero-hint');
-  let hintHidden = false;
+  const tl = gsap.timeline({defaults:{ease:'expo.out'}});
+  tl.to(lines, {y:'0%', duration:1.1, stagger:.08},          0)
+    .to(cta,   {y:'0%', duration:.95},                       .38)
+    .to(dots,  {scale:1, duration:.7, stagger:.05, ease:'elastic.out(1,.6)'}, .68)
+    .to(label, {opacity:1, duration:.5, ease:'power2.out'},   '>-.1');
 
-  function updateOverlays(f){
-    segs.forEach(s=>{
-      s.classList.toggle('visible', f >= +s.dataset.f0 && f <= +s.dataset.f1);
-    });
-    const seg = f < 82 ? 0 : f < 168 ? 1 : 2;
-    dots.forEach((d,i)=>d.classList.toggle('active', i===seg));
-    if(hint && !hintHidden && f > 6){ hintHidden=true; hint.classList.add('hidden'); }
-  }
-
-  /* Scroll → target frame — cover-crop draw */
-  function getTarget(){
-    const rect   = section.getBoundingClientRect();
-    const travel = section.offsetHeight - window.innerHeight;
-    const p      = Math.max(0, Math.min(1, -rect.top / travel));
-    return p * (TOTAL - 1);
-  }
-
-  function draw(f){
-    const i   = Math.max(0, Math.min(TOTAL-1, Math.round(f)));
-    const img = frames[i];
-    if(!img || !img.complete || !img.naturalWidth) return;
-    const vw = canvas.width, vh = canvas.height;
-    const vr = vw / vh, ir = img.naturalWidth / img.naturalHeight;
-    let sx, sy, sw, sh;
-    if(vr > ir){ sw = img.naturalWidth; sh = sw/vr; sx=0; sy=(img.naturalHeight-sh)/2; }
-    else        { sh = img.naturalHeight; sw = sh*vr; sx=(img.naturalWidth-sw)/2; sy=0; }
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, vw, vh);
-  }
-
-  let cur = 0;
-  function loop(){
-    const target = getTarget();
-    const delta  = target - cur;
-    if(Math.abs(delta) > 0.015){ cur += delta * 0.1; draw(cur); updateOverlays(Math.round(cur)); }
-    requestAnimationFrame(loop);
-  }
-
-  function start(){
-    if(loopActive) return;
-    loopActive = true;
-    draw(0); updateOverlays(0); loop();
-  }
-
-  if(frames[0].complete && frames[0].naturalWidth > 0) start();
-  else frames[0].addEventListener('load', start, {once:true});
-  setTimeout(start, 2500);
-}
-
-/* ── CANVAS SCROLL SCRUB ── */
-function initScrub(){
-  const section = document.querySelector('#product-scrub');
-  const canvas  = document.querySelector('.js-scrub-canvas');
-  if(!section || !canvas || reduced) return;
-
-  const ctx   = canvas.getContext('2d');
-  const TOTAL = 144;
-  const SRC_W = 960, SRC_H = 540;
-  const frames = [];
-  let loopActive = false;
-
-  /* Size canvas: contain 16:9 within viewport */
-  function sizeCanvas(){
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const vr = vw / vh, sr = SRC_W / SRC_H;
-    let cw, ch;
-    if(vr >= sr){ ch = vh; cw = Math.round(ch * sr); }
-    else         { cw = vw; ch = Math.round(cw / sr); }
-    if(canvas.width !== cw || canvas.height !== ch){
-      canvas.width = cw; canvas.height = ch;
-    }
-  }
-  window.addEventListener('resize', sizeCanvas, {passive:true});
-  sizeCanvas();
-
-  /* Preload all frames */
-  for(let i = 1; i <= TOTAL; i++){
-    const img = new Image();
-    img.src = `assets/frames/frame_${String(i).padStart(4,'0')}.webp`;
-    frames.push(img);
-  }
-
-  /* Overlay elements */
-  const copies = Array.from(document.querySelectorAll('.js-scrub-copy'));
-  const dots   = Array.from(document.querySelectorAll('.js-scrub-dot'));
-  const nEl    = document.querySelector('.js-scrub-n');
-  const hint   = document.querySelector('.js-scrub-hint');
-
-  let hintHidden = false;
-  function updateOverlays(f){
-    copies.forEach(cp=>{
-      cp.classList.toggle('visible', f >= +cp.dataset.f0 && f <= +cp.dataset.f1);
-    });
-    const seg = f < 50 ? 0 : f < 105 ? 1 : 2;
-    dots.forEach((d,i)=>d.classList.toggle('active', i===seg));
-    if(nEl) nEl.textContent = String(Math.round(f)+1).padStart(2,'0') + '/144';
-    if(hint && !hintHidden && f > 4){
-      hintHidden = true;
-      hint.classList.add('hidden');
-    }
-  }
-
-  /* Scroll progress → target frame */
-  function getTarget(){
-    const rect   = section.getBoundingClientRect();
-    const travel = section.offsetHeight - window.innerHeight;
-    const p      = Math.max(0, Math.min(1, -rect.top / travel));
-    return p * (TOTAL - 1);
-  }
-
-  /* Draw a single frame */
-  function draw(f){
-    const i   = Math.max(0, Math.min(TOTAL-1, Math.round(f)));
-    const img = frames[i];
-    if(img && img.complete && img.naturalWidth > 0){
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  let cur = 0;
-  function loop(){
-    const target = getTarget();
-    const delta  = target - cur;
-    if(Math.abs(delta) > 0.015){
-      cur += delta * 0.1;
-      draw(cur);
-      updateOverlays(Math.round(cur));
-    }
-    requestAnimationFrame(loop);
-  }
-
-  function start(){
-    if(loopActive) return;
-    loopActive = true;
-    draw(0);
-    updateOverlays(0);
-    loop();
-  }
-
-  if(frames[0].complete && frames[0].naturalWidth > 0) start();
-  else frames[0].addEventListener('load', start, {once:true});
-  setTimeout(start, 3000); // guaranteed fallback
+  tl.call(()=>{
+    gsap.to(dots,{y:-5,duration:.32,stagger:{each:.06,repeat:-1,yoyo:true,repeatDelay:4.8},ease:'power2.inOut'});
+  },null,'>+.3');
 }
 
 boot(()=>{
-  initHeroScrub();
+  initHeroEntrance();
   initReveals();
   initScroll();
-  initScrub();
 });
 
 /* ── PAGE TRANSITION ── */
