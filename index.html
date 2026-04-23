@@ -726,6 +726,123 @@ body::after {
   /* Hero dots smaller */
   .hero__dot  { width:10px; height:10px; }
 }
+
+/* ─────────── CANVAS SCROLL SCRUB ─────────── */
+.scrub {
+  position:relative;
+  height:380vh;
+  background:var(--ink);
+}
+.scrub__sticky {
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.scrub__canvas {
+  display:block;
+  position:relative;
+  z-index:1;
+}
+.scrub__overlay {
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+.scrub__copy {
+  position:absolute;
+  bottom:clamp(52px,8vw,100px);
+  left:var(--gutter);
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity .65s var(--e), transform .65s var(--e);
+}
+.scrub__copy.visible {
+  opacity:1;
+  transform:translateY(0);
+}
+.scrub__kicker {
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--blush);
+  margin-bottom:14px;
+}
+.scrub__h2 {
+  font-family:var(--fd);
+  font-style:italic;
+  font-weight:300;
+  font-size:clamp(40px,6vw,96px);
+  line-height:.9;
+  letter-spacing:-.04em;
+  color:var(--cream);
+}
+.scrub__h2 em { color:var(--blush); font-style:italic; }
+.scrub__frame-n {
+  position:absolute;
+  right:var(--gutter);
+  bottom:clamp(52px,8vw,100px);
+  font-family:var(--fm);
+  font-size:10px;
+  letter-spacing:.12em;
+  color:rgba(244,240,232,.2);
+  font-variant-numeric:tabular-nums;
+}
+.scrub__progress {
+  position:absolute;
+  right:var(--gutter);
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.scrub__prog-dot {
+  width:5px; height:5px;
+  border-radius:50%;
+  background:rgba(244,240,232,.2);
+  transition:background .4s var(--e), transform .4s var(--e);
+}
+.scrub__prog-dot.active {
+  background:var(--blush);
+  transform:scale(1.6);
+}
+/* scroll hint line at top of scrub section */
+.scrub__hint {
+  position:absolute;
+  top:clamp(52px,7vw,80px);
+  left:50%;
+  transform:translateX(-50%);
+  font-family:var(--fm);
+  font-size:9px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:rgba(244,240,232,.3);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  opacity:1;
+  transition:opacity .5s var(--e);
+}
+.scrub__hint::before,
+.scrub__hint::after {
+  content:"";
+  width:24px; height:1px;
+  background:rgba(244,240,232,.18);
+}
+.scrub__hint.hidden { opacity:0; }
+@media (pointer:coarse) {
+  .scrub__progress, .scrub__frame-n { display:none; }
+}
+@media (max-width:640px){
+  .scrub__h2 { font-size:clamp(30px,9vw,52px); }
+  .scrub__copy { bottom:clamp(36px,6vw,60px); }
+}
 </style>
 </head>
 <body>
@@ -1012,6 +1129,37 @@ body::after {
 
 </section>
 
+<!-- ══════════ PRODUCT SCRUB ══════════ -->
+<section class="scrub" id="product-scrub" aria-label="Product in motion">
+  <div class="scrub__sticky">
+    <canvas class="scrub__canvas js-scrub-canvas" aria-hidden="true" width="960" height="540"></canvas>
+    <div class="scrub__overlay">
+      <div class="scrub__hint js-scrub-hint">Scroll to explore</div>
+      <!-- Segment 1: opening frames -->
+      <div class="scrub__copy js-scrub-copy" data-f0="0" data-f1="42">
+        <div class="scrub__kicker">The Formula</div>
+        <h2 class="scrub__h2">Pure pigment.<br><em>Perfect glide.</em></h2>
+      </div>
+      <!-- Segment 2: application -->
+      <div class="scrub__copy js-scrub-copy" data-f0="55" data-f1="98">
+        <div class="scrub__kicker">Three coats</div>
+        <h2 class="scrub__h2">Three weeks<br><em>of life.</em></h2>
+      </div>
+      <!-- Segment 3: finish -->
+      <div class="scrub__copy js-scrub-copy" data-f0="108" data-f1="143">
+        <div class="scrub__kicker">No-wipe finish</div>
+        <h2 class="scrub__h2">Drop the<br><em>acetone.</em></h2>
+      </div>
+    </div>
+    <div class="scrub__frame-n js-scrub-n" aria-hidden="true">01/144</div>
+    <div class="scrub__progress" aria-hidden="true">
+      <span class="scrub__prog-dot js-scrub-dot"></span>
+      <span class="scrub__prog-dot js-scrub-dot"></span>
+      <span class="scrub__prog-dot js-scrub-dot"></span>
+    </div>
+  </div>
+</section>
+
 <!-- PILLARS -->
 <section class="pillars">
   <div class="pillars__grid">
@@ -1234,6 +1382,101 @@ function initHeroEntrance(){
   }, null, '>+.4');
 }
 
+/* ── CANVAS SCROLL SCRUB ── */
+function initScrub(){
+  const section = document.querySelector('#product-scrub');
+  const canvas  = document.querySelector('.js-scrub-canvas');
+  if(!section || !canvas || reduced) return;
+
+  const ctx   = canvas.getContext('2d');
+  const TOTAL = 144;
+  const SRC_W = 960, SRC_H = 540;
+  const frames = [];
+  let loopActive = false;
+
+  /* Size canvas: contain 16:9 within viewport */
+  function sizeCanvas(){
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const vr = vw / vh, sr = SRC_W / SRC_H;
+    let cw, ch;
+    if(vr >= sr){ ch = vh; cw = Math.round(ch * sr); }
+    else         { cw = vw; ch = Math.round(cw / sr); }
+    if(canvas.width !== cw || canvas.height !== ch){
+      canvas.width = cw; canvas.height = ch;
+    }
+  }
+  window.addEventListener('resize', sizeCanvas, {passive:true});
+  sizeCanvas();
+
+  /* Preload all frames */
+  for(let i = 1; i <= TOTAL; i++){
+    const img = new Image();
+    img.src = `assets/frames/frame_${String(i).padStart(4,'0')}.webp`;
+    frames.push(img);
+  }
+
+  /* Overlay elements */
+  const copies = Array.from(document.querySelectorAll('.js-scrub-copy'));
+  const dots   = Array.from(document.querySelectorAll('.js-scrub-dot'));
+  const nEl    = document.querySelector('.js-scrub-n');
+  const hint   = document.querySelector('.js-scrub-hint');
+
+  let hintHidden = false;
+  function updateOverlays(f){
+    copies.forEach(cp=>{
+      cp.classList.toggle('visible', f >= +cp.dataset.f0 && f <= +cp.dataset.f1);
+    });
+    const seg = f < 50 ? 0 : f < 105 ? 1 : 2;
+    dots.forEach((d,i)=>d.classList.toggle('active', i===seg));
+    if(nEl) nEl.textContent = String(Math.round(f)+1).padStart(2,'0') + '/144';
+    if(hint && !hintHidden && f > 4){
+      hintHidden = true;
+      hint.classList.add('hidden');
+    }
+  }
+
+  /* Scroll progress → target frame */
+  function getTarget(){
+    const rect   = section.getBoundingClientRect();
+    const travel = section.offsetHeight - window.innerHeight;
+    const p      = Math.max(0, Math.min(1, -rect.top / travel));
+    return p * (TOTAL - 1);
+  }
+
+  /* Draw a single frame */
+  function draw(f){
+    const i   = Math.max(0, Math.min(TOTAL-1, Math.round(f)));
+    const img = frames[i];
+    if(img && img.complete && img.naturalWidth > 0){
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  let cur = 0;
+  function loop(){
+    const target = getTarget();
+    const delta  = target - cur;
+    if(Math.abs(delta) > 0.015){
+      cur += delta * 0.1;
+      draw(cur);
+      updateOverlays(Math.round(cur));
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function start(){
+    if(loopActive) return;
+    loopActive = true;
+    draw(0);
+    updateOverlays(0);
+    loop();
+  }
+
+  if(frames[0].complete && frames[0].naturalWidth > 0) start();
+  else frames[0].addEventListener('load', start, {once:true});
+  setTimeout(start, 3000); // guaranteed fallback
+}
+
 /* ── BOOT ── */
 /* ── VIDEO LOOP CONTROLLER ── */
 function initVideoLoop(){
@@ -1288,6 +1531,7 @@ boot(()=>{
   initHeroEntrance();
   initReveals();
   initScroll();
+  initScrub();
 });
 
 /* ── PAGE TRANSITION ── */
