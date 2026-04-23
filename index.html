@@ -373,9 +373,13 @@ body::after {
 }
 .chapter__title em { color:var(--rose); }
 .chapter--dark .chapter__title em { color:var(--blush); }
+.chapter__right {
+  display:flex; flex-direction:column; align-items:flex-start;
+  gap:clamp(18px,2.4vw,28px); align-self:end; padding-bottom:8px;
+}
 .chapter__desc {
   font-family:var(--fs); font-size:clamp(15px,1.1vw,17px); line-height:1.75;
-  color:rgba(12,12,12,.6); max-width:42ch; align-self:end; padding-bottom:8px;
+  color:rgba(12,12,12,.6); max-width:42ch;
 }
 .chapter--dark .chapter__desc { color:rgba(244,240,232,.6); }
 
@@ -830,7 +834,10 @@ body::after {
         <div class="chapter__num" data-r>Chapter 01</div>
         <h2 class="chapter__title" data-r data-d="1">The <em>Classics</em>.</h2>
       </div>
-      <p class="chapter__desc" data-r data-d="2">Red that reads across rooms. White that photographs like fresh linen. Two shades every collection needs before anything else.</p>
+      <div class="chapter__right">
+        <p class="chapter__desc" data-r data-d="2">Red that reads across rooms. White that photographs like fresh linen. Two shades every collection needs before anything else.</p>
+        <a href="shop.html#classics" class="btn btn-ink" data-r data-d="3">Shop the Classics →</a>
+      </div>
     </div>
   </div>
   <div class="grid-section">
@@ -861,7 +868,10 @@ body::after {
         <div class="chapter__num" data-r>Chapter 02</div>
         <h2 class="chapter__title" data-r data-d="1">Warm <em>Tones</em>.</h2>
       </div>
-      <p class="chapter__desc" data-r data-d="2">Melons, salmons, soft sunset oranges, a pink that remembers summer. Four shades that hold the light.</p>
+      <div class="chapter__right">
+        <p class="chapter__desc" data-r data-d="2">Melons, salmons, soft sunset oranges, a pink that remembers summer. Four shades that hold the light.</p>
+        <a href="shop.html#warm" class="btn btn-outline" data-r data-d="3">Shop Warm Tones →</a>
+      </div>
     </div>
   </div>
   <div class="grid-section grid-section--dark">
@@ -908,7 +918,10 @@ body::after {
         <div class="chapter__num" data-r>Chapter 03</div>
         <h2 class="chapter__title" data-r data-d="1">Cool &amp; <em>Statement</em>.</h2>
       </div>
-      <p class="chapter__desc" data-r data-d="2">For the days the outfit is quiet. Seven shades from powder-soft to full fluorescent — the full reason this brand exists.</p>
+      <div class="chapter__right">
+        <p class="chapter__desc" data-r data-d="2">For the days the outfit is quiet. Seven shades from powder-soft to full fluorescent — the full reason this brand exists.</p>
+        <a href="shop.html#cool" class="btn btn-ink" data-r data-d="3">Shop Cool &amp; Statement →</a>
+      </div>
     </div>
   </div>
   <div class="grid-section">
