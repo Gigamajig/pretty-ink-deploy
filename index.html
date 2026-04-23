@@ -113,28 +113,46 @@ body::after {
 .cur-dot,.cur-ring,.cur-glow {
   position:fixed; top:0; left:0; pointer-events:none; z-index:9998; will-change:transform;
 }
-.cur-dot  { width:5px; height:5px; border-radius:50%; background:var(--cream); margin:-2.5px 0 0 -2.5px; mix-blend-mode:difference; }
+/* Precise dot — rose colored, stays sharp */
+.cur-dot {
+  width:4px; height:4px; border-radius:50%;
+  background:var(--rose); margin:-2px 0 0 -2px;
+}
+/* Trailing ring — delicate, no crosshairs */
 .cur-ring {
-  width:32px; height:32px; border-radius:50%;
-  border:1px solid rgba(244,240,232,.55); margin:-16px 0 0 -16px;
-  transition:width .45s var(--e),height .45s var(--e),margin .45s var(--e),border-color .3s,opacity .3s;
+  width:24px; height:24px; border-radius:50%;
+  border:1px solid rgba(12,12,12,.28); margin:-12px 0 0 -12px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  transition:width .42s var(--e), height .42s var(--e), margin .42s var(--e),
+             border-color .3s, background .3s;
 }
-.cur-ring::before,
-.cur-ring::after {
-  content:""; position:absolute; background:rgba(244,240,232,.4);
-  transition:background .3s;
+/* Context label inside ring (only visible on .on state) */
+.cur-label {
+  font-family:var(--fm); font-size:7px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--ink); opacity:0; pointer-events:none; white-space:nowrap; line-height:1;
+  transition:opacity .22s var(--e);
 }
-.cur-ring::before { width:1px; height:6px; top:-9px; left:50%; transform:translateX(-50%); }
-.cur-ring::after  { width:6px; height:1px; left:-9px; top:50%; transform:translateY(-50%); }
+/* Card hover — expand + show label */
 .cur-ring.on {
-  width:52px; height:52px; margin:-26px 0 0 -26px;
+  width:64px; height:64px; margin:-32px 0 0 -32px;
+  border-color:var(--rose); background:rgba(196,95,95,.05);
+}
+.cur-ring.on .cur-label { opacity:1; }
+/* Link hover — subtle expand, blush */
+.cur-ring.on-link {
+  width:40px; height:40px; margin:-20px 0 0 -20px;
   border-color:var(--blush);
 }
-.cur-ring.on::before,
-.cur-ring.on::after { background:rgba(232,180,176,.6); }
+/* Ring goes light on dark-background sections */
+.cur-ring.dark-zone { border-color:rgba(244,240,232,.35); }
+.cur-ring.dark-zone .cur-label { color:var(--cream); }
+.cur-ring.dark-zone.on { border-color:var(--blush); background:rgba(232,180,176,.06); }
+.cur-ring.dark-zone.on-link { border-color:rgba(244,240,232,.5); }
+/* Ambient glow — rose-tinted */
 .cur-glow {
-  width:360px; height:360px; margin:-180px 0 0 -180px; border-radius:50%; z-index:9997;
-  background:radial-gradient(circle,rgba(232,180,176,.16) 0%,transparent 68%); mix-blend-mode:multiply;
+  width:300px; height:300px; margin:-150px 0 0 -150px; border-radius:50%; z-index:9997;
+  background:radial-gradient(circle, rgba(196,95,95,.09) 0%, rgba(232,180,176,.04) 45%, transparent 70%);
+  mix-blend-mode:multiply;
 }
 @media (pointer:coarse){ .cur-dot,.cur-ring,.cur-glow{ display:none; } }
 
@@ -720,7 +738,7 @@ body::after {
 
 <!-- CURSOR -->
 <div class="cur-glow js-glow"></div>
-<div class="cur-ring js-ring"></div>
+<div class="cur-ring js-ring"><span class="cur-label js-cur-label"></span></div>
 <div class="cur-dot  js-dot"></div>
 
 <!-- MASTHEAD -->
@@ -1118,21 +1136,49 @@ window.addEventListener('scroll',()=>{ mast?.classList.toggle('scrolled',window.
 const dot=document.querySelector('.js-dot');
 const ring=document.querySelector('.js-ring');
 const glow=document.querySelector('.js-glow');
+const curLabel=document.querySelector('.js-cur-label');
 const coarse=window.matchMedia('(pointer:coarse)').matches;
 if(!coarse && dot && ring && glow){
   let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my,gx=mx,gy=my;
   document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
   (function loop(){
-    rx+=(mx-rx)*.18; ry+=(my-ry)*.18;
-    gx+=(mx-gx)*.07; gy+=(my-gy)*.07;
+    rx+=(mx-rx)*.35; ry+=(my-ry)*.35;  /* snappier — was .18 */
+    gx+=(mx-gx)*.09; gy+=(my-gy)*.09;
     dot.style.transform =`translate3d(${mx}px,${my}px,0)`;
     ring.style.transform=`translate3d(${rx}px,${ry}px,0)`;
     glow.style.transform=`translate3d(${gx}px,${gy}px,0)`;
     requestAnimationFrame(loop);
   })();
-  document.querySelectorAll('a,button,input,.card,.sig__img').forEach(el=>{
-    el.addEventListener('mouseenter',()=>ring.classList.add('on'));
-    el.addEventListener('mouseleave',()=>ring.classList.remove('on'));
+
+  /* Cards — big ring + contextual label */
+  document.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      ring.classList.add('on'); ring.classList.remove('on-link');
+      if(curLabel) curLabel.textContent='Shop';
+    });
+    el.addEventListener('mouseleave',()=>{ ring.classList.remove('on'); });
+  });
+  /* Sig product image */
+  document.querySelectorAll('.sig__img').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      ring.classList.add('on'); ring.classList.remove('on-link');
+      if(curLabel) curLabel.textContent='View';
+    });
+    el.addEventListener('mouseleave',()=>{ ring.classList.remove('on'); });
+  });
+  /* Links + buttons — subtle expansion, no label */
+  document.querySelectorAll('a,button,input').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      if(!ring.classList.contains('on')) ring.classList.add('on-link');
+    });
+    el.addEventListener('mouseleave',()=>{ ring.classList.remove('on-link'); });
+  });
+
+  /* Dark-zone detection — flip ring to light when over dark sections */
+  const darkSections = document.querySelectorAll('.hero,.chapter--dark,.grid-section--dark,.founder,.cta,.footer');
+  darkSections.forEach(sec=>{
+    sec.addEventListener('mouseenter',()=>ring.classList.add('dark-zone'));
+    sec.addEventListener('mouseleave',()=>ring.classList.remove('dark-zone'));
   });
 }
 
