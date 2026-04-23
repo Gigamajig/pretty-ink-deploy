@@ -50,6 +50,18 @@ body::after{
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
+/* ─────────── PAGE TRANSITION ─────────── */
+.pg-veil{position:fixed;inset:0;z-index:10000;background:var(--ink);transform:scaleY(0);transform-origin:top center;transition:transform .5s cubic-bezier(0.76,0,0.24,1);pointer-events:none;}
+.pg-veil.in{transform:scaleY(1);pointer-events:all;}
+.pg-veil.out{transform-origin:bottom center;transform:scaleY(0);}
+
+/* ─────────── CURSOR RIPPLE ─────────── */
+@keyframes curRipple{0%{width:0;height:0;margin:0;opacity:.55;}100%{width:100px;height:100px;margin:-50px;opacity:0;}}
+.cur-ripple{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9997;border:1px solid rgba(12,12,12,.4);animation:curRipple .6s cubic-bezier(0.22,1,0.36,1) forwards;}
+
+/* ─────────── TAB RIPPLE ─────────── */
+@keyframes tabRipple{0%{transform:scale(0);opacity:.4;}100%{transform:scale(4);opacity:0;}}
+
 /* ─────────── CURSOR ─────────── */
 .cur-dot,.cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9998;will-change:transform;}
 .cur-dot{width:5px;height:5px;border-radius:50%;background:var(--cream);margin:-2.5px 0 0 -2.5px;mix-blend-mode:difference;}
@@ -142,6 +154,9 @@ body::after{
   display:flex;flex-direction:column;
   background:transparent;
   cursor:none;
+  contain:layout style;
+  transform-style:preserve-3d;
+  transition:transform 400ms cubic-bezier(0.22,1,0.36,1);
 }
 
 .product-card__media{
@@ -504,6 +519,8 @@ body::after{
 </style>
 </head>
 <body>
+
+<div class="pg-veil js-pg-veil" aria-hidden="true"></div>
 
 <!-- CURSOR -->
 <div class="cur-dot  js-dot"></div>
@@ -1264,6 +1281,70 @@ document.querySelector('.js-sticky-checkout').addEventListener('click', doChecko
 /* ── INIT ── */
 renderCart();
 updateBadge();
+
+/* ── PAGE TRANSITION ── */
+(function(){
+  const veil = document.querySelector('.js-pg-veil');
+  if(!veil) return;
+  veil.classList.add('out');
+  document.addEventListener('click', e=>{
+    const a = e.target.closest('a[href]');
+    if(!a) return;
+    const url = a.getAttribute('href');
+    if(!url || url.startsWith('#') || url.startsWith('http') || url.startsWith('mailto')) return;
+    e.preventDefault();
+    veil.classList.remove('out');
+    veil.classList.add('in');
+    setTimeout(()=>{ window.location.href = url; }, 520);
+  });
+})();
+
+/* ── CURSOR CLICK RIPPLE ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches) return;
+  document.addEventListener('click', e=>{
+    const r = document.createElement('div');
+    r.className = 'cur-ripple';
+    r.style.left = e.clientX + 'px';
+    r.style.top  = e.clientY + 'px';
+    document.body.appendChild(r);
+    r.addEventListener('animationend', ()=>r.remove());
+  });
+})();
+
+/* ── 3D TILT ON PRODUCT CARDS ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches) return;
+  document.querySelectorAll('.product-card').forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
+      const y = ((e.clientY - rect.top)  / rect.height - 0.5) * -2;
+      card.style.transform = `perspective(900px) rotateY(${x*5}deg) rotateX(${y*5}deg) translateY(-3px)`;
+    });
+    card.addEventListener('mouseleave', ()=>{
+      card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) translateY(0)';
+    });
+  });
+})();
+
+/* ── FILTER TAB RIPPLE ── */
+(function(){
+  document.querySelectorAll('.shop-filter-btn').forEach(btn=>{
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.addEventListener('click', e=>{
+      const r = document.createElement('span');
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `position:absolute;border-radius:50%;background:currentColor;opacity:0.18;
+        width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;
+        transform:scale(0);animation:tabRipple 500ms ease-out forwards;pointer-events:none;`;
+      btn.appendChild(r);
+      r.addEventListener('animationend', ()=>r.remove());
+    });
+  });
+})();
 </script>
 </body>
 </html>

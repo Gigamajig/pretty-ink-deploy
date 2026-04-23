@@ -62,6 +62,27 @@ body::after {
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
+/* ─────────── PAGE TRANSITION ─────────── */
+.pg-veil {
+  position:fixed; inset:0; z-index:10000; background:var(--ink);
+  transform:scaleY(0); transform-origin:top center;
+  transition:transform .5s cubic-bezier(0.76,0,0.24,1);
+  pointer-events:none;
+}
+.pg-veil.in  { transform:scaleY(1); pointer-events:all; }
+.pg-veil.out { transform-origin:bottom center; transform:scaleY(0); }
+
+/* ─────────── CURSOR RIPPLE ─────────── */
+@keyframes curRipple {
+  0%   { width:0; height:0; margin:0; opacity:.55; }
+  100% { width:100px; height:100px; margin:-50px; opacity:0; }
+}
+.cur-ripple {
+  position:fixed; top:0; left:0; border-radius:50%; pointer-events:none; z-index:9997;
+  border:1px solid rgba(244,240,232,.6);
+  animation:curRipple .6s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
 /* ─────────── PRELOADER ─────────── */
 .pre { position:fixed; inset:0; z-index:9999; pointer-events:none; }
 .pre__lanes { position:absolute; inset:0; display:grid; grid-template-columns:repeat(5,1fr); }
@@ -410,7 +431,7 @@ body::after {
 
 /* shade card */
 .card {
-  position:relative; cursor:none; overflow:hidden;
+  position:relative; cursor:none; overflow:hidden; contain:layout style;
 }
 @media (pointer:coarse){ .card { cursor:pointer; } }
 
@@ -710,6 +731,7 @@ body::after {
 <body>
 
 <!-- PRELOADER -->
+<div class="pg-veil js-pg-veil" aria-hidden="true"></div>
 <div class="pre js-pre" aria-hidden="true">
   <div class="pre__lanes">
     <div class="pre__lane js-lane"></div>
@@ -752,7 +774,7 @@ body::after {
 <!-- ══════════ HERO ══════════ -->
 <section class="hero" id="hero">
   <div class="hero__media">
-    <video autoplay muted playsinline preload="auto">
+    <video autoplay muted loop playsinline preload="auto" style="background:var(--ink)">
       <source src="assets/video/veo3.mp4" type="video/mp4">
     </video>
   </div>
@@ -1267,6 +1289,38 @@ boot(()=>{
   initReveals();
   initScroll();
 });
+
+/* ── PAGE TRANSITION ── */
+(function(){
+  const veil = document.querySelector('.js-pg-veil');
+  if(!veil || reduced) return;
+  // Reveal on load — veil starts closed, opens out
+  veil.classList.add('out');
+  // Intercept same-origin page links
+  document.addEventListener('click', e=>{
+    const a = e.target.closest('a[href]');
+    if(!a) return;
+    const url = a.getAttribute('href');
+    if(!url || url.startsWith('#') || url.startsWith('http') || url.startsWith('mailto')) return;
+    e.preventDefault();
+    veil.classList.remove('out');
+    veil.classList.add('in');
+    setTimeout(()=>{ window.location.href = url; }, 520);
+  });
+})();
+
+/* ── CURSOR CLICK RIPPLE ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches) return;
+  document.addEventListener('click', e=>{
+    const r = document.createElement('div');
+    r.className = 'cur-ripple';
+    r.style.left = e.clientX + 'px';
+    r.style.top  = e.clientY + 'px';
+    document.body.appendChild(r);
+    r.addEventListener('animationend', ()=>r.remove());
+  });
+})();
 
 })();
 </script>
