@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pretty Ink — Shop the Collection</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<style>
+/* ─────────── TOKENS ─────────── */
+:root {
+  --ink:    #0c0c0c;
+  --cream:  #f5f1ea;
+  --paper:  #ede9e0;
+  --blush:  #e8b4b0;
+  --rose:   #c45f5f;
+  --gold:   #c9a96e;
+  --fd:"Cormorant Garamond",serif;
+  --fs:"DM Sans",sans-serif;
+  --fm:"DM Mono",monospace;
+  --e:cubic-bezier(0.22,1,0.36,1);
+  --gutter:clamp(24px,5.5vw,80px);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--cream);color:var(--ink);
+  font-family:var(--fs);font-size:clamp(14px,1vw,16px);
+  line-height:1.65;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;cursor:none;
+}
+@media(pointer:coarse){body{cursor:auto;}}
+img,video{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+button{font:inherit;cursor:none;background:none;border:0;color:inherit;}
+@media(pointer:coarse){button{cursor:pointer;}}
+::selection{background:var(--ink);color:var(--cream);}
+
+/* grain */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  opacity:.032;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ─────────── CURSOR ─────────── */
+.cur-dot,.cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9998;will-change:transform;}
+.cur-dot{width:5px;height:5px;border-radius:50%;background:var(--cream);margin:-2.5px 0 0 -2.5px;mix-blend-mode:difference;}
+.cur-ring{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(244,240,232,.55);margin:-16px 0 0 -16px;
+  transition:width .45s var(--e),height .45s var(--e),margin .45s var(--e),border-color .3s;
+}
+.cur-ring::before,.cur-ring::after{content:"";position:absolute;background:rgba(244,240,232,.4);}
+.cur-ring::before{width:1px;height:6px;top:-9px;left:50%;transform:translateX(-50%);}
+.cur-ring::after{width:6px;height:1px;left:-9px;top:50%;transform:translateY(-50%);}
+.cur-ring.on{width:52px;height:52px;margin:-26px 0 0 -26px;border-color:var(--blush);}
+@media(pointer:coarse){.cur-dot,.cur-ring{display:none;}}
+
+/* ─────────── MASTHEAD ─────────── */
+.mast{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  padding:0 var(--gutter);height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(245,241,234,.94);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(12,12,12,.08);
+}
+.mast__left{font-family:var(--fm);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:rgba(12,12,12,.45);display:flex;align-items:center;gap:16px;}
+.mast__logo{font-family:var(--fd);font-style:italic;font-weight:300;font-size:22px;letter-spacing:-.01em;color:var(--ink);}
+.mast__right{display:flex;align-items:center;gap:20px;font-family:var(--fm);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:rgba(12,12,12,.45);}
+.mast__links{display:flex;gap:20px;}
+.mast__links a:hover{opacity:.55;}
+.mast__cart-btn{
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  border:1px solid rgba(12,12,12,.18);border-radius:999px;
+  transition:border-color .25s,background .25s;
+  color:var(--ink);
+}
+.mast__cart-btn:hover{border-color:var(--ink);background:rgba(12,12,12,.04);}
+.mast__cart-count{
+  font-family:var(--fm);font-size:9px;letter-spacing:.1em;
+  background:var(--rose);color:var(--cream);
+  width:16px;height:16px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(0);transition:opacity .25s,transform .25s var(--e);
+}
+.mast__cart-count.show{opacity:1;transform:scale(1);}
+@media(max-width:768px){.mast__links,.mast__left{display:none;}.mast__right{gap:12px;}}
+
+/* ─────────── SHOP HERO ─────────── */
+.shop-hero{
+  padding-top:52px;background:var(--ink);color:var(--cream);
+  padding-bottom:0;position:relative;overflow:hidden;
+}
+.shop-hero__inner{
+  padding:clamp(48px,7vw,96px) var(--gutter) 0;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:32px;
+  flex-wrap:wrap;
+}
+.shop-hero__heading{
+  font-family:var(--fd);font-style:italic;font-weight:300;
+  font-size:clamp(52px,9vw,140px);line-height:.88;letter-spacing:-.04em;
+  color:var(--cream);
+}
+.shop-hero__heading em{color:var(--blush);font-style:italic;}
+.shop-hero__meta{font-family:var(--fm);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,240,232,.45);padding-bottom:clamp(12px,2vw,24px);}
+
+/* Filters */
+.shop-filters{
+  display:flex;gap:0;border-top:1px solid rgba(244,240,232,.1);
+  margin-top:clamp(32px,4vw,56px);overflow-x:auto;
+  scrollbar-width:none;
+}
+.shop-filters::-webkit-scrollbar{display:none;}
+.filter-btn{
+  font-family:var(--fm);font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(244,240,232,.4);
+  padding:16px 24px;border-bottom:1px solid transparent;
+  transition:color .25s,border-color .25s;white-space:nowrap;
+  cursor:none;
+}
+.filter-btn:hover{color:rgba(244,240,232,.8);}
+.filter-btn.active{color:var(--cream);border-bottom-color:var(--blush);}
+
+/* ─────────── PRODUCT GRID ─────────── */
+.shop-body{padding:clamp(48px,6vw,80px) var(--gutter);}
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(clamp(220px,22vw,300px),1fr));
+  gap:clamp(16px,2.5vw,32px);
+}
+
+.product-card{
+  display:flex;flex-direction:column;
+  background:transparent;
+  cursor:none;
+}
+
+.product-card__media{
+  /* Hard clip boundary — image must never escape this box */
+  position:relative;
+  overflow:hidden;
+  aspect-ratio:3/4;
+  background:#e8e4dc;
+  border-radius:3px;
+}
+.product-card__media img{
+  /* Absolute fill — bypasses the height:100% + aspect-ratio resolution bug */
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  filter:grayscale(12%);
+  transform:scale(1);
+  transform-origin:center center;
+  transition:transform 1.1s var(--e), filter .5s;
+  will-change:transform;
+}
+.product-card:hover .product-card__media img{
+  transform:scale(1.07);
+  filter:grayscale(0%);
+}
+
+.product-card__tint{
+  position:absolute;inset:0;mix-blend-mode:multiply;opacity:.18;
+  transition:opacity .4s;
+}
+.product-card:hover .product-card__tint{opacity:.28;}
+
+.product-card__badge{
+  position:absolute;top:12px;right:12px;
+  font-family:var(--fm);font-size:8px;letter-spacing:.2em;text-transform:uppercase;
+  background:var(--rose);color:var(--cream);
+  padding:4px 10px;border-radius:999px;
+}
+
+.product-card__quick{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(12,12,12,.88);
+  display:flex;align-items:center;justify-content:center;
+  padding:14px;
+  font-family:var(--fm);font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--cream);
+  transform:translateY(100%);
+  transition:transform .4s var(--e);
+}
+.product-card:hover .product-card__quick{transform:translateY(0);}
+
+.product-card__body{padding:16px 0 20px;}
+.product-card__swatch{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.product-card__dot{
+  width:10px;height:10px;border-radius:50%;
+  border:1px solid rgba(12,12,12,.12);flex-shrink:0;
+}
+.product-card__shade{font-family:var(--fm);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(12,12,12,.38);}
+.product-card__name{
+  font-family:var(--fd);font-style:italic;font-weight:400;
+  font-size:clamp(22px,2.4vw,28px);line-height:1.1;letter-spacing:-.02em;
+  color:var(--ink);margin-bottom:4px;
+}
+.product-card__note{font-size:13px;color:rgba(12,12,12,.5);line-height:1.5;margin-bottom:14px;}
+.product-card__footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.product-card__price{
+  font-family:var(--fm);font-size:13px;letter-spacing:.04em;
+  font-weight:500;color:var(--ink);
+}
+.product-card__price .was{text-decoration:line-through;color:rgba(12,12,12,.3);margin-right:4px;}
+.product-card__atc{
+  font-family:var(--fm);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+  border:1px solid rgba(12,12,12,.2);border-radius:999px;
+  padding:9px 16px;color:var(--ink);
+  transition:background .25s,border-color .25s,color .25s;
+}
+.product-card__atc:hover{background:var(--ink);border-color:var(--ink);color:var(--cream);}
+.product-card__atc.added{background:var(--rose);border-color:var(--rose);color:var(--cream);}
+@media(pointer:coarse){.product-card__atc{cursor:pointer;}}
+
+/* Section label */
+.collection-label{
+  font-family:var(--fm);font-size:9px;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(12,12,12,.35);margin-bottom:clamp(20px,3vw,32px);
+  padding-bottom:12px;border-bottom:1px solid rgba(12,12,12,.08);
+}
+.product-section{margin-bottom:clamp(48px,7vw,96px);}
+.product-section.hidden{display:none;}
+
+/* ─────────── BUNDLES ─────────── */
+.bundles{
+  background:var(--ink);color:var(--cream);
+  padding:clamp(56px,8vw,112px) var(--gutter);
+}
+.bundles__heading{
+  font-family:var(--fd);font-style:italic;font-weight:300;
+  font-size:clamp(36px,5vw,72px);letter-spacing:-.03em;line-height:.9;
+  margin-bottom:clamp(8px,1.5vw,16px);
+}
+.bundles__heading em{color:var(--blush);}
+.bundles__sub{font-family:var(--fm);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,240,232,.4);margin-bottom:clamp(32px,5vw,56px);}
+.bundle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:clamp(16px,2.5vw,24px);}
+.bundle-card{
+  border:1px solid rgba(244,240,232,.1);padding:clamp(24px,3vw,36px);
+  display:flex;flex-direction:column;gap:16px;
+  transition:border-color .3s,background .3s;
+}
+.bundle-card:hover{border-color:rgba(244,240,232,.3);background:rgba(244,240,232,.03);}
+.bundle-card__name{font-family:var(--fd);font-style:italic;font-weight:300;font-size:clamp(28px,3vw,40px);letter-spacing:-.02em;line-height:1;}
+.bundle-card__name em{color:var(--blush);}
+.bundle-card__desc{font-size:13px;color:rgba(244,240,232,.55);line-height:1.6;}
+.bundle-card__shades{display:flex;gap:6px;flex-wrap:wrap;}
+.bundle-card__shade-dot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.15);}
+.bundle-card__footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.bundle-card__price{font-family:var(--fm);font-size:15px;font-weight:500;color:var(--cream);}
+.bundle-card__price .was{text-decoration:line-through;color:rgba(244,240,232,.3);margin-right:4px;font-size:12px;}
+.bundle-card__price .save{font-size:9px;letter-spacing:.15em;color:var(--blush);margin-left:6px;}
+.bundle-card__btn{
+  font-family:var(--fm);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+  border:1px solid rgba(244,240,232,.35);border-radius:999px;
+  padding:10px 20px;color:var(--cream);white-space:nowrap;flex-shrink:0;
+  transition:background .25s,border-color .25s;cursor:none;
+}
+.bundle-card__btn:hover{background:var(--cream);color:var(--ink);}
+@media(pointer:coarse){.bundle-card__btn{cursor:pointer;}}
+
+/* ─────────── CART DRAWER ─────────── */
+.cart-backdrop{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(12,12,12,0);pointer-events:none;
+  transition:background .4s;
+}
+.cart-backdrop.open{background:rgba(12,12,12,.5);pointer-events:all;}
+
+.cart-drawer{
+  position:fixed;top:0;right:0;bottom:0;z-index:801;
+  width:min(420px,100vw);
+  background:var(--cream);
+  transform:translateX(100%);
+  transition:transform .5s var(--e);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.cart-drawer.open{transform:translateX(0);}
+
+.cart-drawer__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 28px;border-bottom:1px solid rgba(12,12,12,.08);
+  flex-shrink:0;
+}
+.cart-drawer__title{
+  font-family:var(--fd);font-style:italic;font-weight:300;
+  font-size:26px;letter-spacing:-.02em;
+}
+.cart-drawer__close{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(12,12,12,.15);border-radius:50%;
+  font-size:16px;line-height:1;transition:background .2s,border-color .2s;
+  cursor:none;
+}
+.cart-drawer__close:hover{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+@media(pointer:coarse){.cart-drawer__close{cursor:pointer;}}
+
+.cart-drawer__items{flex:1;overflow-y:auto;padding:8px 0;}
+.cart-drawer__empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:12px;
+  font-family:var(--fd);font-style:italic;font-size:22px;letter-spacing:-.01em;color:rgba(12,12,12,.3);
+}
+.cart-drawer__empty-sub{font-family:var(--fm);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(12,12,12,.2);font-style:normal;}
+
+.cart-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 28px;border-bottom:1px solid rgba(12,12,12,.06);
+}
+.cart-item__img{
+  width:56px;height:72px;object-fit:cover;
+  background:#e0dbd2;flex-shrink:0;
+}
+.cart-item__info{flex:1;min-width:0;}
+.cart-item__name{font-family:var(--fd);font-style:italic;font-size:18px;letter-spacing:-.01em;line-height:1.2;margin-bottom:2px;}
+.cart-item__shade{font-family:var(--fm);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(12,12,12,.4);}
+.cart-item__controls{display:flex;align-items:center;gap:0;margin-top:8px;}
+.cart-item__qty-btn{
+  width:24px;height:24px;border:1px solid rgba(12,12,12,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;line-height:1;transition:background .2s;cursor:none;
+}
+.cart-item__qty-btn:hover{background:rgba(12,12,12,.06);}
+@media(pointer:coarse){.cart-item__qty-btn{cursor:pointer;}}
+.cart-item__qty{
+  width:32px;text-align:center;
+  font-family:var(--fm);font-size:11px;letter-spacing:.05em;
+  border-top:1px solid rgba(12,12,12,.15);border-bottom:1px solid rgba(12,12,12,.15);
+  height:24px;line-height:24px;
+}
+.cart-item__remove{
+  font-family:var(--fm);font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(12,12,12,.3);margin-left:8px;
+  transition:color .2s;cursor:none;
+}
+.cart-item__remove:hover{color:var(--rose);}
+@media(pointer:coarse){.cart-item__remove{cursor:pointer;}}
+.cart-item__price{font-family:var(--fm);font-size:13px;font-weight:500;margin-left:auto;padding-left:8px;}
+
+.cart-drawer__foot{
+  flex-shrink:0;padding:20px 28px;
+  border-top:1px solid rgba(12,12,12,.1);
+  background:var(--cream);
+}
+.cart-subtotal{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:6px;
+}
+.cart-subtotal__label{font-family:var(--fm);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(12,12,12,.45);}
+.cart-subtotal__val{font-family:var(--fd);font-weight:400;font-size:22px;letter-spacing:-.01em;}
+.cart-shipping{font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:rgba(12,12,12,.35);margin-bottom:18px;}
+.cart-checkout{
+  display:block;width:100%;
+  background:var(--ink);color:var(--cream);
+  font-family:var(--fm);font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  padding:17px;text-align:center;
+  border:1px solid var(--ink);
+  transition:background .3s,color .3s;cursor:none;
+  border-radius:2px;
+}
+.cart-checkout:hover{background:transparent;color:var(--ink);}
+@media(pointer:coarse){.cart-checkout{cursor:pointer;}}
+.cart-checkout:disabled{opacity:.4;pointer-events:none;}
+.cart-note{font-family:var(--fm);font-size:8px;letter-spacing:.12em;color:rgba(12,12,12,.3);text-align:center;margin-top:10px;}
+
+/* ─────────── STICKY CHECKOUT BAR ─────────── */
+.sticky-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:499;
+  background:rgba(245,241,234,.95);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(12,12,12,.08);
+  padding:12px var(--gutter);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  transform:translateY(100%);
+  transition:transform .4s var(--e);
+}
+.sticky-bar.show{transform:translateY(0);}
+.sticky-bar__summary{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.sticky-bar__count{font-family:var(--fm);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(12,12,12,.45);}
+.sticky-bar__total{font-family:var(--fd);font-style:italic;font-size:22px;letter-spacing:-.01em;}
+.sticky-bar__btn{
+  font-family:var(--fm);font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  background:var(--ink);color:var(--cream);
+  padding:13px 28px;border-radius:2px;
+  transition:background .25s;cursor:none;white-space:nowrap;
+}
+.sticky-bar__btn:hover{background:var(--rose);}
+@media(pointer:coarse){.sticky-bar__btn{cursor:pointer;}}
+
+/* ─────────── FOOTER ─────────── */
+.shop-footer{
+  padding:clamp(40px,6vw,72px) var(--gutter);
+  border-top:1px solid rgba(12,12,12,.08);
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:32px;
+}
+.footer-col__label{font-family:var(--fm);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:rgba(12,12,12,.4);margin-bottom:14px;}
+.footer-col__links{display:flex;flex-direction:column;gap:8px;}
+.footer-col__links a{font-size:14px;color:rgba(12,12,12,.65);transition:color .2s;}
+.footer-col__links a:hover{color:var(--ink);}
+.footer-bottom{
+  padding:16px var(--gutter);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  border-top:1px solid rgba(12,12,12,.06);
+}
+.footer-bottom__copy{font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:rgba(12,12,12,.3);}
+
+/* ─────────── UTILS ─────────── */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — TABLET + MOBILE
+   ═══════════════════════════════════════════ */
+
+/* ── Tablet (≤900px) ── */
+@media(max-width:900px){
+  .shop-hero__heading{ font-size:clamp(44px,9vw,96px); }
+  .bundle-grid{ grid-template-columns:1fr 1fr; }
+}
+
+/* ── Mobile (≤768px) ── */
+@media(max-width:768px){
+  /* Nav already hides links — show a compact cart button */
+  .mast__clock{ display:none; }
+
+  /* Shop hero */
+  .shop-hero__inner{ flex-direction:column; align-items:flex-start; gap:16px; }
+  .shop-hero__heading{ font-size:clamp(40px,11vw,72px); }
+  .shop-hero__meta{ padding-bottom:0; }
+
+  /* Filter tabs — smaller hit targets on mobile */
+  .filter-btn{ padding:14px 16px; font-size:8px; letter-spacing:.2em; }
+
+  /* CRITICAL: product grid → 2 fixed columns */
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+
+  /* Card body tighter on mobile */
+  .product-card__body{ padding:10px 0 14px; }
+  .product-card__name{ font-size:clamp(14px,4vw,20px); }
+  .product-card__note{ font-size:12px; margin-bottom:10px; }
+  .product-card__atc{
+    padding:7px 10px; font-size:7px;
+    letter-spacing:.16em;
+  }
+  .product-card__footer{ gap:4px; }
+
+  /* Bundle grid → single column centered */
+  .bundle-grid{ grid-template-columns:1fr; max-width:420px; margin-inline:auto; }
+
+  /* Cart drawer → true full-width on small screens */
+  .cart-drawer{ width:100vw; max-width:100vw; }
+  .cart-drawer__head,
+  .cart-drawer__foot{ padding-inline:20px; }
+  .cart-item{ padding-inline:20px; }
+
+  /* Sticky bar */
+  .sticky-bar__total{ font-size:17px; }
+
+  /* Footer */
+  .shop-footer{ grid-template-columns:repeat(2,1fr); gap:28px; }
+  .footer-bottom{ flex-direction:column; text-align:center; gap:6px; }
+}
+
+/* ── Small mobile (≤480px) ── */
+@media(max-width:480px){
+  :root{ --gutter:16px; }
+
+  /* One-up product grid when cards get too narrow */
+  .product-grid{
+    grid-template-columns:1fr 1fr; /* keep 2-up, images are tall and look good */
+    gap:8px;
+  }
+
+  /* Bundle card full width */
+  .bundle-grid{ max-width:100%; }
+  .bundle-card__name{ font-size:clamp(22px,7vw,32px); }
+  .bundle-card__footer{ flex-direction:column; align-items:flex-start; gap:12px; }
+
+  /* Sticky bar stacks */
+  .sticky-bar{ flex-wrap:wrap; gap:8px; padding:12px 16px; }
+  .sticky-bar__total{ font-size:15px; }
+
+  /* Footer single col */
+  .shop-footer{ grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cur-dot  js-dot"></div>
+<div class="cur-ring js-ring"></div>
+
+<!-- MASTHEAD -->
+<header class="mast">
+  <div class="mast__left">
+    <span>Pontiac, MI</span>
+  </div>
+  <a href="index.html" class="mast__logo">Pretty Ink</a>
+  <div class="mast__right">
+    <nav class="mast__links">
+      <a href="index.html#classics">Classics</a>
+      <a href="index.html#warm">Warm</a>
+      <a href="index.html#cool">Cool</a>
+      <a href="index.html#founder">Story</a>
+    </nav>
+    <button class="mast__cart-btn js-cart-open" aria-label="Open cart">
+      Cart
+      <span class="mast__cart-count js-cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- SHOP HERO -->
+<section class="shop-hero">
+  <div class="shop-hero__inner">
+    <div>
+      <h1 class="shop-hero__heading">The <em>Collection</em>.</h1>
+    </div>
+    <p class="shop-hero__meta">13 Shades &nbsp;·&nbsp; Vegan &nbsp;·&nbsp; Long-wear &nbsp;·&nbsp; From $14</p>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="shop-filters" id="filters">
+    <button class="filter-btn active js-filter" data-filter="all">All Shades</button>
+    <button class="filter-btn js-filter" data-filter="classics">Classics</button>
+    <button class="filter-btn js-filter" data-filter="warm">Warm Tones</button>
+    <button class="filter-btn js-filter" data-filter="cool">Cool &amp; Statement</button>
+    <button class="filter-btn js-filter" data-filter="essentials">Base &amp; Top</button>
+  </div>
+</section>
+
+<!-- PRODUCT GRID -->
+<main class="shop-body">
+
+  <!-- CLASSICS -->
+  <section class="product-section js-section" id="classics" data-category="classics">
+    <div class="collection-label">Chapter 01 — The Classics</div>
+    <div class="product-grid">
+
+      <div class="product-card js-card"
+           data-id="red-01" data-name="Red." data-shade="Shade 01 · Warm Crimson"
+           data-price="14" data-color="#b02a2a" data-img="assets/nails/red.png"
+           data-stripe="https://buy.stripe.com/REPLACE_RED_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/red.png" alt="Red nail polish">
+          <div class="product-card__tint" style="background:#8b1a1a;"></div>
+          <div class="product-card__badge">Best Seller</div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#b02a2a;"></span>
+            <span class="product-card__shade">Shade 01 · Warm Crimson</span>
+          </div>
+          <div class="product-card__name">Red.</div>
+          <div class="product-card__note">Warm saturated crimson. The brand's foundation shade.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="white-02" data-name="White." data-shade="Shade 02 · Warm White"
+           data-price="14" data-color="#f5f0e6" data-img="assets/nails/white.png"
+           data-stripe="https://buy.stripe.com/REPLACE_WHITE_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/white.png" alt="White nail polish">
+          <div class="product-card__tint" style="background:#c8c0b0;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#f5f0e6;border-color:rgba(0,0,0,.15);"></span>
+            <span class="product-card__shade">Shade 02 · Warm White</span>
+          </div>
+          <div class="product-card__name">White.</div>
+          <div class="product-card__note">Warm paper, not stark. Opaque in two coats.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WARM -->
+  <section class="product-section js-section" id="warm" data-category="warm">
+    <div class="collection-label">Chapter 02 — Warm Tones</div>
+    <div class="product-grid">
+
+      <div class="product-card js-card"
+           data-id="light-melon-03" data-name="Light Melon." data-shade="Shade 03"
+           data-price="14" data-color="#f4a89a" data-img="assets/nails/light-melon.png"
+           data-stripe="https://buy.stripe.com/REPLACE_LIGHTMELON_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/light-melon.png" alt="Light Melon nail polish">
+          <div class="product-card__tint" style="background:#d47060;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#f4a89a;"></span>
+            <span class="product-card__shade">Shade 03</span>
+          </div>
+          <div class="product-card__name">Light Melon.</div>
+          <div class="product-card__note">Creamy coral-peach. A terracotta pot in late summer light.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="salmon-04" data-name="Salmon." data-shade="Shade 04"
+           data-price="14" data-color="#e88877" data-img="assets/nails/salmon.png"
+           data-stripe="https://buy.stripe.com/REPLACE_SALMON_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/salmon.png" alt="Salmon nail polish">
+          <div class="product-card__tint" style="background:#c05040;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#e88877;"></span>
+            <span class="product-card__shade">Shade 04</span>
+          </div>
+          <div class="product-card__name">Salmon.</div>
+          <div class="product-card__note">Pinker than coral, warmer than blush. Universally flattering.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="sunkiss-05" data-name="Sunkiss Orange." data-shade="Shade 05"
+           data-price="14" data-color="#e86f3a" data-img="assets/nails/sunkiss-orange.png"
+           data-stripe="https://buy.stripe.com/REPLACE_SUNKISS_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/sunkiss-orange.png" alt="Sunkiss Orange nail polish">
+          <div class="product-card__tint" style="background:#b84a1a;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#e86f3a;"></span>
+            <span class="product-card__shade">Shade 05</span>
+          </div>
+          <div class="product-card__name">Sunkiss Orange.</div>
+          <div class="product-card__note">Warm Mediterranean orange. Reads golden on deeper tones.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="pink-06" data-name="Pink." data-shade="Shade 06"
+           data-price="14" data-color="#e27aa0" data-img="assets/nails/pink.png"
+           data-stripe="https://buy.stripe.com/REPLACE_PINK_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/pink.png" alt="Pink nail polish">
+          <div class="product-card__tint" style="background:#a03060;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#e27aa0;"></span>
+            <span class="product-card__shade">Shade 06</span>
+          </div>
+          <div class="product-card__name">Pink.</div>
+          <div class="product-card__note">Clean mid-pink. Neither bubblegum nor dusty. Just right.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COOL & STATEMENT -->
+  <section class="product-section js-section" id="cool" data-category="cool">
+    <div class="collection-label">Chapter 03 — Cool &amp; Statement</div>
+    <div class="product-grid">
+
+      <div class="product-card js-card"
+           data-id="aqua-07" data-name="Aqua." data-shade="Shade 07"
+           data-price="14" data-color="#3bbccc" data-img="assets/nails/aqua.png"
+           data-stripe="https://buy.stripe.com/REPLACE_AQUA_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/aqua.png" alt="Aqua nail polish">
+          <div class="product-card__tint" style="background:#1a7080;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#3bbccc;"></span>
+            <span class="product-card__shade">Shade 07</span>
+          </div>
+          <div class="product-card__name">Aqua.</div>
+          <div class="product-card__note">Caribbean clear. Cool enough for summer, bold enough for January.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="powder-blue-08" data-name="Powder Blue." data-shade="Shade 08"
+           data-price="14" data-color="#88aac8" data-img="assets/nails/powder-blue.png"
+           data-stripe="https://buy.stripe.com/REPLACE_POWDERBLUE_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/powder-blue.png" alt="Powder Blue nail polish">
+          <div class="product-card__tint" style="background:#7090b0;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#88aac8;"></span>
+            <span class="product-card__shade">Shade 08</span>
+          </div>
+          <div class="product-card__name">Powder Blue.</div>
+          <div class="product-card__note">Hazy morning sky. Soft, quiet, and impossible to overdo.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="dark-blue-09" data-name="Dark Blue." data-shade="Shade 09"
+           data-price="14" data-color="#1f3b80" data-img="assets/nails/dark-blue.png"
+           data-stripe="https://buy.stripe.com/REPLACE_DARKBLUE_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/dark-blue.png" alt="Dark Blue nail polish">
+          <div class="product-card__tint" style="background:#0a1840;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#1f3b80;"></span>
+            <span class="product-card__shade">Shade 09</span>
+          </div>
+          <div class="product-card__name">Dark Blue.</div>
+          <div class="product-card__note">Midnight formal. Deep navy that photographs like a statement.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="purple-10" data-name="Purple." data-shade="Shade 10"
+           data-price="14" data-color="#6e3d8a" data-img="assets/nails/purple.png"
+           data-stripe="https://buy.stripe.com/REPLACE_PURPLE_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/purple.png" alt="Purple nail polish">
+          <div class="product-card__tint" style="background:#40185a;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#6e3d8a;"></span>
+            <span class="product-card__shade">Shade 10</span>
+          </div>
+          <div class="product-card__name">Purple.</div>
+          <div class="product-card__note">Rich grape. The definition of intentional.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="sunshine-11" data-name="Bright Sunshine." data-shade="Shade 11"
+           data-price="14" data-color="#f7d32c" data-img="assets/nails/bright-sunshine.png"
+           data-stripe="https://buy.stripe.com/REPLACE_SUNSHINE_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/bright-sunshine.png" alt="Bright Sunshine nail polish">
+          <div class="product-card__tint" style="background:#a08000;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#f7d32c;"></span>
+            <span class="product-card__shade">Shade 11</span>
+          </div>
+          <div class="product-card__name">Bright Sunshine.</div>
+          <div class="product-card__note">Fluorescent yellow. Loud, clean, unapologetic.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="lime-green-12" data-name="Lime Green." data-shade="Shade 12"
+           data-price="14" data-color="#7ab828" data-img="assets/nails/lime-green.png"
+           data-stripe="https://buy.stripe.com/REPLACE_LIMEGREEN_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/lime-green.png" alt="Lime Green nail polish">
+          <div class="product-card__tint" style="background:#607020;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#7ab828;"></span>
+            <span class="product-card__shade">Shade 12</span>
+          </div>
+          <div class="product-card__name">Lime Green.</div>
+          <div class="product-card__note">Yellow-forward green. The color of August on a front porch.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="bright-green-13" data-name="Bright Green." data-shade="Shade 13"
+           data-price="14" data-color="#3ab85a" data-img="assets/nails/bright-green.png"
+           data-stripe="https://buy.stripe.com/REPLACE_BRIGHTGREEN_LINK">
+        <div class="product-card__media">
+          <img src="assets/nails/bright-green.png" alt="Bright Green nail polish">
+          <div class="product-card__tint" style="background:#106030;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#3ab85a;"></span>
+            <span class="product-card__shade">Shade 13</span>
+          </div>
+          <div class="product-card__name">Bright Green.</div>
+          <div class="product-card__note">True grass green. The most-requested shade before we bottled it.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$14.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BASE & TOP COAT -->
+  <section class="product-section js-section" data-category="essentials">
+    <div class="collection-label">Essentials — Base &amp; Top Coat</div>
+    <div class="product-grid">
+
+      <div class="product-card js-card"
+           data-id="base-coat" data-name="Base Coat." data-shade="Foundation"
+           data-price="12" data-color="#e8e0d0" data-img="assets/shades/base-coat.jpg"
+           data-stripe="https://buy.stripe.com/REPLACE_BASECOAT_LINK">
+        <div class="product-card__media">
+          <img src="assets/shades/base-coat.jpg" alt="Pretty Ink Base Coat">
+          <div class="product-card__tint" style="background:#c8b090;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#e8e0d0;border-color:rgba(0,0,0,.12);"></span>
+            <span class="product-card__shade">Foundation</span>
+          </div>
+          <div class="product-card__name">Base Coat.</div>
+          <div class="product-card__note">Smooths ridges and extends wear. Start every application here.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$12.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card js-card"
+           data-id="top-coat" data-name="Top Coat." data-shade="Finish"
+           data-price="12" data-color="#f0ece4" data-img="assets/shades/top-coat.png"
+           data-stripe="https://buy.stripe.com/REPLACE_TOPCOAT_LINK">
+        <div class="product-card__media">
+          <img src="assets/shades/top-coat.png" alt="Pretty Ink Top Coat">
+          <div class="product-card__tint" style="background:#b0a890;"></div>
+          <div class="product-card__quick">Quick Add +</div>
+        </div>
+        <div class="product-card__body">
+          <div class="product-card__swatch">
+            <span class="product-card__dot" style="background:#f0ece4;border-color:rgba(0,0,0,.12);"></span>
+            <span class="product-card__shade">Finish</span>
+          </div>
+          <div class="product-card__name">Top Coat.</div>
+          <div class="product-card__note">High-gloss, no-wipe. Seals color and adds mirror finish in 60 seconds.</div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$12.00</span>
+            <button class="product-card__atc js-atc">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- BUNDLES -->
+<section class="bundles">
+  <h2 class="bundles__heading">Build your <em>set.</em></h2>
+  <p class="bundles__sub">Curated bundles &nbsp;·&nbsp; Save up to $12</p>
+  <div class="bundle-grid">
+
+    <div class="bundle-card">
+      <div class="bundle-card__name">The <em>Starter.</em></div>
+      <div class="bundle-card__desc">Any 3 shades. Perfect for building your first collection — includes free shipping.</div>
+      <div class="bundle-card__shades">
+        <span class="bundle-card__shade-dot" style="background:#b02a2a;"></span>
+        <span class="bundle-card__shade-dot" style="background:#f5f0e6;border-color:rgba(255,255,255,.3);"></span>
+        <span class="bundle-card__shade-dot" style="background:#e27aa0;"></span>
+        <span style="font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:rgba(244,240,232,.35);align-self:center;">+ your pick</span>
+      </div>
+      <div class="bundle-card__footer">
+        <span class="bundle-card__price"><span class="was">$42</span>$36 <span class="save">save $6</span></span>
+        <button class="bundle-card__btn js-bundle-atc"
+                data-name="The Starter Set" data-price="36"
+                data-stripe="https://buy.stripe.com/REPLACE_STARTER_BUNDLE">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="bundle-card">
+      <div class="bundle-card__name">The <em>Wardrobe.</em></div>
+      <div class="bundle-card__desc">Any 5 shades. A full rotation for every season, every outfit, every mood.</div>
+      <div class="bundle-card__shades">
+        <span class="bundle-card__shade-dot" style="background:#b02a2a;"></span>
+        <span class="bundle-card__shade-dot" style="background:#e86f3a;"></span>
+        <span class="bundle-card__shade-dot" style="background:#f7d32c;"></span>
+        <span class="bundle-card__shade-dot" style="background:#3bbccc;"></span>
+        <span class="bundle-card__shade-dot" style="background:#6e3d8a;"></span>
+        <span style="font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:rgba(244,240,232,.35);align-self:center;">+ free top coat</span>
+      </div>
+      <div class="bundle-card__footer">
+        <span class="bundle-card__price"><span class="was">$70</span>$60 <span class="save">save $10</span></span>
+        <button class="bundle-card__btn js-bundle-atc"
+                data-name="The Wardrobe Set" data-price="60"
+                data-stripe="https://buy.stripe.com/REPLACE_WARDROBE_BUNDLE">Add to Cart</button>
+      </div>
+    </div>
+
+    <div class="bundle-card">
+      <div class="bundle-card__name">The Full <em>Ink.</em></div>
+      <div class="bundle-card__desc">All 13 shades + base + top coat. The complete Pretty Ink experience.</div>
+      <div class="bundle-card__shades">
+        <span class="bundle-card__shade-dot" style="background:#b02a2a;"></span>
+        <span class="bundle-card__shade-dot" style="background:#f5f0e6;border-color:rgba(255,255,255,.3);"></span>
+        <span class="bundle-card__shade-dot" style="background:#e88877;"></span>
+        <span class="bundle-card__shade-dot" style="background:#3bbccc;"></span>
+        <span class="bundle-card__shade-dot" style="background:#7ab828;"></span>
+        <span class="bundle-card__shade-dot" style="background:#6e3d8a;"></span>
+        <span class="bundle-card__shade-dot" style="background:#f7d32c;"></span>
+        <span style="font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:rgba(244,240,232,.35);align-self:center;">all 13</span>
+      </div>
+      <div class="bundle-card__footer">
+        <span class="bundle-card__price"><span class="was">$206</span>$149 <span class="save">save $57</span></span>
+        <button class="bundle-card__btn js-bundle-atc"
+                data-name="The Full Ink Collection" data-price="149"
+                data-stripe="https://buy.stripe.com/REPLACE_FULL_INK_BUNDLE">Add to Cart</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CART DRAWER -->
+<div class="cart-backdrop js-cart-backdrop"></div>
+<aside class="cart-drawer js-cart-drawer" aria-label="Shopping cart">
+  <div class="cart-drawer__head">
+    <h2 class="cart-drawer__title">Your Cart</h2>
+    <button class="cart-drawer__close js-cart-close" aria-label="Close cart">×</button>
+  </div>
+  <div class="cart-drawer__items js-cart-items">
+    <div class="cart-drawer__empty">
+      <span>Nothing here yet.</span>
+      <span class="cart-drawer__empty-sub">Add a shade to start</span>
+    </div>
+  </div>
+  <div class="cart-drawer__foot">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal__label">Subtotal</span>
+      <span class="cart-subtotal__val js-cart-total">$0.00</span>
+    </div>
+    <div class="cart-shipping">Free shipping on orders over $40 &nbsp;·&nbsp; Calculated at checkout</div>
+    <button class="cart-checkout js-checkout" disabled>Checkout →</button>
+    <p class="cart-note">Secure checkout via Stripe · Ships from Pontiac, MI</p>
+  </div>
+</aside>
+
+<!-- STICKY BAR -->
+<div class="sticky-bar js-sticky-bar">
+  <div class="sticky-bar__summary">
+    <span class="sticky-bar__count js-sticky-count">0 items</span>
+    <span class="sticky-bar__total js-sticky-total">$0.00</span>
+  </div>
+  <button class="sticky-bar__btn js-sticky-checkout">Checkout →</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="shop-footer">
+    <div class="footer-col">
+      <div class="footer-col__label">Pretty Ink</div>
+      <div class="footer-col__links">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="index.html#founder">Our Story</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col__label">Help</div>
+      <div class="footer-col__links">
+        <a href="#">Shipping &amp; Returns</a>
+        <a href="#">Application Guide</a>
+        <a href="#">FAQ</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col__label">Follow</div>
+      <div class="footer-col__links">
+        <a href="#">Instagram</a>
+        <a href="#">TikTok</a>
+        <a href="#">Pinterest</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col__label">Made in</div>
+      <div class="footer-col__links">
+        <a href="#">Pontiac, Michigan</a>
+        <a href="#">Vegan &amp; Cruelty-Free</a>
+        <a href="#">Black Woman-Owned</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-bottom__copy">© 2026 Pretty Ink Inc. All rights reserved.</span>
+    <span class="footer-bottom__copy">Pontiac, MI &nbsp;·&nbsp; By Deneen Butler</span>
+  </div>
+</footer>
+
+<script>
+/* ── CART STATE ── */
+let cart = JSON.parse(localStorage.getItem('pi-cart') || '[]');
+
+function saveCart(){ localStorage.setItem('pi-cart', JSON.stringify(cart)); }
+
+function getItem(id){ return cart.find(i => i.id === id); }
+
+function addItem(data){
+  const existing = getItem(data.id);
+  if(existing){ existing.qty++; }
+  else { cart.push({ id:data.id, name:data.name, shade:data.shade, price:parseFloat(data.price), img:data.img, qty:1, stripe:data.stripe }); }
+  saveCart(); renderCart(); updateBadge();
+}
+
+function removeItem(id){ cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); updateBadge(); }
+
+function changeQty(id, delta){
+  const item = getItem(id);
+  if(!item) return;
+  item.qty = Math.max(0, item.qty + delta);
+  if(item.qty === 0) removeItem(id);
+  else { saveCart(); renderCart(); updateBadge(); }
+}
+
+function cartTotal(){ return cart.reduce((s,i) => s + i.price * i.qty, 0); }
+function cartCount(){ return cart.reduce((s,i) => s + i.qty, 0); }
+
+/* ── RENDER CART ── */
+function renderCart(){
+  const el    = document.querySelector('.js-cart-items');
+  const total = document.querySelector('.js-cart-total');
+  const chk   = document.querySelector('.js-checkout');
+  const sticky = document.querySelector('.js-sticky-bar');
+  const sCount = document.querySelector('.js-sticky-count');
+  const sTotal = document.querySelector('.js-sticky-total');
+  const count  = cartCount();
+  const sum    = cartTotal();
+
+  total.textContent = '$' + sum.toFixed(2);
+  if(chk) chk.disabled = count === 0;
+
+  /* sticky bar */
+  if(count > 0){
+    sticky?.classList.add('show');
+    if(sCount) sCount.textContent = count + ' item' + (count !== 1 ? 's' : '');
+    if(sTotal) sTotal.textContent = '$' + sum.toFixed(2);
+  } else {
+    sticky?.classList.remove('show');
+  }
+
+  if(count === 0){
+    el.innerHTML = `<div class="cart-drawer__empty"><span>Nothing here yet.</span><span class="cart-drawer__empty-sub">Add a shade to start</span></div>`;
+    return;
+  }
+
+  el.innerHTML = cart.map(i => `
+    <div class="cart-item" data-id="${i.id}">
+      <img class="cart-item__img" src="${i.img}" alt="${i.name}">
+      <div class="cart-item__info">
+        <div class="cart-item__name">${i.name}</div>
+        <div class="cart-item__shade">${i.shade}</div>
+        <div class="cart-item__controls">
+          <button class="cart-item__qty-btn js-qty-minus" data-id="${i.id}">−</button>
+          <span class="cart-item__qty">${i.qty}</span>
+          <button class="cart-item__qty-btn js-qty-plus" data-id="${i.id}">+</button>
+          <button class="cart-item__remove js-remove" data-id="${i.id}">Remove</button>
+        </div>
+      </div>
+      <span class="cart-item__price">$${(i.price * i.qty).toFixed(2)}</span>
+    </div>
+  `).join('');
+
+  /* re-bind qty buttons */
+  el.querySelectorAll('.js-qty-minus').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.id, -1)));
+  el.querySelectorAll('.js-qty-plus').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.id, 1)));
+  el.querySelectorAll('.js-remove').forEach(b => b.addEventListener('click', () => removeItem(b.dataset.id)));
+}
+
+/* ── UPDATE BADGE ── */
+function updateBadge(){
+  const count = cartCount();
+  document.querySelectorAll('.js-cart-count').forEach(el => {
+    el.textContent = count;
+    el.classList.toggle('show', count > 0);
+  });
+}
+
+/* ── DRAWER OPEN / CLOSE ── */
+function openCart(){ document.querySelector('.js-cart-drawer').classList.add('open'); document.querySelector('.js-cart-backdrop').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeCart(){ document.querySelector('.js-cart-drawer').classList.remove('open'); document.querySelector('.js-cart-backdrop').classList.remove('open'); document.body.style.overflow=''; }
+
+/* ── CHECKOUT ── */
+function doCheckout(){
+  if(cart.length === 0) return;
+  /* If single item, go directly to its Stripe Payment Link */
+  if(cart.length === 1 && cart[0].stripe && !cart[0].stripe.includes('REPLACE')){
+    window.location.href = cart[0].stripe;
+    return;
+  }
+  /* Multi-item: go to the first item's link with note, or custom checkout URL */
+  /* TODO: replace with your Stripe Checkout session endpoint or Payment Link */
+  const checkoutUrl = 'https://buy.stripe.com/REPLACE_CHECKOUT_URL';
+  if(checkoutUrl.includes('REPLACE')){
+    alert('Stripe payment links not yet configured. Add your product links to the data-stripe attributes.');
+    return;
+  }
+  window.location.href = checkoutUrl;
+}
+
+/* ── FILTER ── */
+document.querySelectorAll('.js-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.js-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.js-section').forEach(sec => {
+      const cat = sec.dataset.category;
+      sec.classList.toggle('hidden', f !== 'all' && cat !== f);
+    });
+  });
+});
+
+/* ── ADD TO CART BUTTONS ── */
+document.querySelectorAll('.js-atc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.js-card');
+    addItem(card.dataset);
+    btn.textContent = 'Added ✓';
+    btn.classList.add('added');
+    setTimeout(() => { btn.textContent = 'Add to Cart'; btn.classList.remove('added'); }, 1800);
+  });
+});
+
+document.querySelectorAll('.js-card .product-card__quick').forEach(el => {
+  el.addEventListener('click', () => {
+    const card = el.closest('.js-card');
+    addItem(card.dataset);
+    openCart();
+  });
+});
+
+/* ── BUNDLE ADD TO CART ── */
+document.querySelectorAll('.js-bundle-atc').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const d = btn.dataset;
+    cart.push({ id: 'bundle-' + Date.now(), name: d.name, shade: 'Bundle', price: parseFloat(d.price), img: 'assets/product/lineup.png', qty: 1, stripe: d.stripe });
+    saveCart(); renderCart(); updateBadge();
+    btn.textContent = 'Added ✓';
+    setTimeout(() => { btn.textContent = 'Add to Cart'; }, 1800);
+    openCart();
+  });
+});
+
+/* ── CART EVENTS ── */
+document.querySelector('.js-cart-open').addEventListener('click', openCart);
+document.querySelector('.js-cart-close').addEventListener('click', closeCart);
+document.querySelector('.js-cart-backdrop').addEventListener('click', closeCart);
+document.querySelector('.js-checkout').addEventListener('click', doCheckout);
+document.querySelector('.js-sticky-checkout').addEventListener('click', doCheckout);
+
+/* ── CURSOR ── */
+(function(){
+  const dot  = document.querySelector('.js-dot');
+  const ring = document.querySelector('.js-ring');
+  if(!dot || !ring) return;
+  if(window.matchMedia('(pointer:coarse)').matches) return;
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; dot.style.transform=`translate3d(${mx}px,${my}px,0)`; });
+  document.querySelectorAll('a,button,.product-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>ring.classList.add('on'));
+    el.addEventListener('mouseleave',()=>ring.classList.remove('on'));
+  });
+  (function loop(){
+    rx += (mx-rx)*.1; ry += (my-ry)*.1;
+    ring.style.transform=`translate3d(${rx}px,${ry}px,0)`;
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ── LENIS ── */
+(function(){
+  if(typeof Lenis==='undefined') return;
+  const lenis = new Lenis({ duration:1.1, easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)) });
+  function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+})();
+
+/* ── INIT ── */
+renderCart();
+updateBadge();
+</script>
+</body>
+</html>
