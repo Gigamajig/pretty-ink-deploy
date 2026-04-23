@@ -175,123 +175,7 @@ body::after {
 .mast__clock { font-variant-numeric:tabular-nums; letter-spacing:.12em; }
 @media (max-width:768px){ .mast__links,.mast__left { display:none; } .mast__right { gap:12px; } }
 
-/* ─────────── HERO ─────────── */
-.hero {
-  position:relative; height:100svh; min-height:640px;
-  overflow:hidden; color:var(--cream); background:#040404;
-}
-
-/* Full-bleed campaign video */
-.hero__media {
-  position:absolute; inset:0; z-index:0;
-}
-.hero__media video {
-  position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; object-position:center 38%;
-  animation:hZoom 18s ease-out forwards;
-  filter:contrast(1.14) saturate(1.28) brightness(0.84);
-}
-@keyframes hZoom { from{transform:scale(1.07)} to{transform:scale(1.00)} }
-
-/* Cinematic overlay: solid left text zone, deep bottom, open right */
-.hero__cin {
-  position:absolute; inset:0; z-index:2;
-  background:
-    linear-gradient(to bottom,
-      rgba(4,4,4,.68) 0%,
-      rgba(4,4,4,.04) 28%,
-      rgba(4,4,4,.78) 60%,
-      rgba(4,4,4,.98) 100%
-    ),
-    linear-gradient(96deg,
-      rgba(4,4,4,.98) 0%,
-      rgba(4,4,4,.93) 28%,
-      rgba(4,4,4,.58) 46%,
-      rgba(4,4,4,.14) 62%,
-      transparent 100%
-    );
-}
-
-/* Smooth loop crossfade overlay */
-.hero__loop-fade {
-  position:absolute; inset:0; z-index:3;
-  background:#040404; opacity:0; pointer-events:none;
-}
-
-/* Glass panel — subtle frosted surface behind text block */
-.hero__glass {
-  position:absolute; bottom:0; left:0; z-index:3;
-  width:58%; height:88%;
-  background:rgba(4,4,4,.07);
-  backdrop-filter:blur(6px) saturate(1.1);
-  -webkit-backdrop-filter:blur(6px) saturate(1.1);
-  pointer-events:none;
-  -webkit-mask-image:linear-gradient(to right, black 55%, transparent 100%),
-                     linear-gradient(to top, black 80%, transparent 100%);
-  mask-image:linear-gradient(to right, black 55%, transparent 100%),
-             linear-gradient(to top, black 80%, transparent 100%);
-  -webkit-mask-composite:intersect; mask-composite:intersect;
-}
-@media (max-width:900px){ .hero__glass { width:100%; } }
-
-/* Locked text-protection zone — absorbs any color state from video */
-.hero__body::before {
-  content:""; position:absolute; inset:0; z-index:-1;
-  background:
-    radial-gradient(ellipse 90% 120% at 0% 100%,
-      rgba(4,4,4,.72) 0%,
-      rgba(4,4,4,.38) 55%,
-      transparent 100%
-    );
-  pointer-events:none;
-}
-
-/* Gold rule */
-.hero::after {
-  content:""; position:absolute; bottom:0; left:0; right:0;
-  height:2px; background:var(--gold); z-index:6;
-}
-
-/* Content zone — bottom-anchored */
-.hero__body {
-  position:absolute; bottom:0; left:0; right:0; z-index:4;
-  padding:clamp(32px,5vw,56px) var(--gutter) clamp(36px,5.5vw,68px);
-  max-width:62%;
-}
-/* side column — vertical editorial label, right edge */
-.hero__side {
-  position:absolute; right:var(--gutter); top:50%; z-index:5;
-  transform:translateY(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:18px;
-}
-.hero__side-rule {
-  width:1px; height:clamp(40px,6vw,72px);
-  background:rgba(244,240,232,.20);
-}
-.hero__side-text {
-  font-family:var(--fm); font-size:9px; letter-spacing:.3em; text-transform:uppercase;
-  color:rgba(244,240,232,.78);
-  writing-mode:vertical-rl; transform:rotate(180deg);
-  white-space:nowrap; line-height:1;
-}
-@media (max-width:768px){ .hero__side { display:none; } }
-
-/* Masked line reveal — the cinematic technique */
-.hero__h1 {
-  font-family:var(--fd); font-style:italic; font-weight:300;
-  font-size:clamp(72px,12.5vw,210px); line-height:.86; letter-spacing:-.048em;
-  margin-bottom:clamp(28px,3.8vw,48px);
-  color:#fff;
-}
-.hero__line { display:block; overflow:hidden; }
-.hero__line-inner { display:block; transform:translateY(110%); }
-.hero__h1 em { color:var(--blush); font-style:italic; }
-
-/* CTA wrapper for masked reveal */
-.hero__cta-mask { overflow:hidden; margin-bottom:clamp(20px,2.8vw,36px); }
-.hero__cta-inner { display:flex; gap:12px; flex-wrap:wrap; align-items:center; transform:translateY(110%); }
-
-/* buttons */
+/* ─────────── BUTTONS ─────────── */
 .btn {
   display:inline-flex; align-items:center; gap:8px;
   font-family:var(--fm); font-size:9px; letter-spacing:.25em; text-transform:uppercase;
@@ -309,27 +193,153 @@ body::after {
 .btn-ghost { background:transparent; color:var(--cream); border:1px solid rgba(244,240,232,.38); letter-spacing:.22em; }
 .btn-ghost:hover { border-color:rgba(244,240,232,.85); background:rgba(244,240,232,.05); }
 
-.hero__shades { display:flex; align-items:center; gap:6px; opacity:.72; }
-.hero__dot {
+/* ─────────── HERO SCROLL SCRUB ─────────── */
+.hero-scrub {
+  position:relative;
+  height:500vh;
+  background:var(--ink);
+}
+.hero-scrub__sticky {
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow:hidden;
+  color:var(--cream);
+}
+/* Gold rule at foot of sticky panel */
+.hero-scrub__sticky::after {
+  content:""; position:absolute; bottom:0; left:0; right:0;
+  height:2px; background:var(--gold); z-index:6;
+}
+/* Canvas fills sticky viewport — sized to cover via JS */
+.hero-scrub__canvas {
+  position:absolute;
+  top:0; left:0;
+  z-index:0;
+}
+/* Cinematic overlay: solid bottom-left text zone, open right */
+.hero-scrub__cin {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:
+    linear-gradient(to bottom,
+      rgba(4,4,4,.65) 0%,
+      rgba(4,4,4,.02) 26%,
+      rgba(4,4,4,.72) 58%,
+      rgba(4,4,4,.97) 100%
+    ),
+    linear-gradient(96deg,
+      rgba(4,4,4,.95) 0%,
+      rgba(4,4,4,.88) 26%,
+      rgba(4,4,4,.50) 44%,
+      rgba(4,4,4,.10) 62%,
+      transparent 100%
+    );
+}
+/* Vertical side label */
+.hero-scrub__side {
+  position:absolute; right:var(--gutter); top:50%; z-index:5;
+  transform:translateY(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+}
+.hero-scrub__side-rule {
+  width:1px; height:clamp(40px,6vw,72px);
+  background:rgba(244,240,232,.20);
+}
+.hero-scrub__side-text {
+  font-family:var(--fm); font-size:9px; letter-spacing:.3em; text-transform:uppercase;
+  color:rgba(244,240,232,.78);
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  white-space:nowrap; line-height:1;
+}
+@media (max-width:768px){ .hero-scrub__side { display:none; } }
+
+/* Copy segments — all stacked at bottom-left, fade in/out by frame */
+.hero-scrub__seg {
+  position:absolute;
+  bottom:clamp(36px,5.5vw,68px);
+  left:var(--gutter);
+  z-index:4;
+  max-width:65%;
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .7s var(--e), transform .7s var(--e);
+  pointer-events:none;
+}
+.hero-scrub__seg.visible {
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.hero-scrub__eyebrow {
+  font-family:var(--fm); font-size:9px; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--blush); margin-bottom:18px;
+}
+.hero-scrub__h1 {
+  font-family:var(--fd); font-style:italic; font-weight:300;
+  font-size:clamp(68px,11.5vw,190px); line-height:.87; letter-spacing:-.048em;
+  color:#fff; margin-bottom:clamp(22px,3vw,40px);
+}
+.hero-scrub__h1 em { color:var(--blush); font-style:italic; }
+.hero-scrub__cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:clamp(18px,2.5vw,32px); }
+/* Shade dots row */
+.hero-scrub__shades { display:flex; align-items:center; gap:6px; opacity:.72; }
+.hero-scrub__dot {
   width:11px; height:11px; border-radius:50%;
   border:1px solid rgba(255,255,255,.14); display:inline-block;
-  transform:scale(0);
   cursor:none;
-  transition:border-color .25s;
-}
-.hero__dot:hover {
-  transform:scale(1.5) !important;
   transition:transform .25s cubic-bezier(0.34,1.56,0.64,1), border-color .25s;
-  border-color:rgba(255,255,255,.55);
 }
-.hero__dot-more {
+.hero-scrub__dot:hover { transform:scale(1.5); border-color:rgba(255,255,255,.55); }
+@media (pointer:coarse){ .hero-scrub__dot { cursor:pointer; } }
+.hero-scrub__dot-more {
   font-family:var(--fm); font-size:9px; letter-spacing:.15em;
-  color:rgba(244,240,232,.55); margin-left:6px; opacity:0;
+  color:rgba(244,240,232,.55); margin-left:6px;
 }
-
+/* Progress indicator bottom-right */
+.hero-scrub__progress {
+  position:absolute;
+  right:var(--gutter); bottom:clamp(40px,6vw,72px);
+  display:flex; gap:8px; z-index:5;
+}
+.hero-scrub__prog-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:rgba(244,240,232,.2);
+  transition:background .4s var(--e), transform .4s var(--e);
+}
+.hero-scrub__prog-dot.active {
+  background:var(--blush); transform:scale(1.6);
+}
+/* Animated scroll nudge — vertical line pulse */
+.hero-scrub__scroll-hint {
+  position:absolute;
+  bottom:clamp(20px,3vw,36px); left:50%; z-index:5;
+  transform:translateX(-50%);
+  font-family:var(--fm); font-size:9px; letter-spacing:.28em; text-transform:uppercase;
+  color:rgba(244,240,232,.28);
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  transition:opacity .5s var(--e);
+}
+.hero-scrub__scroll-hint::after {
+  content:""; width:1px; height:30px;
+  background:rgba(244,240,232,.2);
+  animation:shPulse 1.9s ease-in-out infinite;
+}
+@keyframes shPulse {
+  0%   { transform:scaleY(0); transform-origin:top;    }
+  49%  { transform:scaleY(1); transform-origin:top;    }
+  50%  { transform:scaleY(1); transform-origin:bottom; }
+  100% { transform:scaleY(0); transform-origin:bottom; }
+}
+.hero-scrub__scroll-hint.hidden { opacity:0; pointer-events:none; }
 @media (max-width:900px){
-  .hero__body { max-width:100%; }
-  .hero__h1 { font-size:clamp(56px,14vw,100px); }
+  .hero-scrub__seg  { max-width:100%; }
+  .hero-scrub__h1   { font-size:clamp(52px,13vw,96px); }
+}
+@media (max-width:640px){
+  .hero-scrub__h1     { font-size:clamp(42px,12vw,72px); line-height:.9; }
+  .hero-scrub__shades { gap:5px; flex-wrap:wrap; max-width:88vw; }
+  .hero-scrub__dot    { width:10px; height:10px; }
+  .hero-scrub__progress { display:none; }
 }
 
 /* ─────────── MARQUEE ─────────── */
@@ -888,49 +898,70 @@ body::after {
   </div>
 </header>
 
-<!-- ══════════ HERO ══════════ -->
-<section class="hero" id="hero">
-  <div class="hero__media">
-    <video autoplay muted loop playsinline preload="auto" style="background:var(--ink)">
-      <source src="assets/video/veo3.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="hero__cin"></div>
-  <div class="hero__loop-fade"></div>
-  <div class="hero__glass"></div>
+<!-- ══════════ HERO SCROLL SCRUB ══════════ -->
+<section class="hero-scrub" id="hero">
+  <div class="hero-scrub__sticky">
 
-  <div class="hero__side">
-    <div class="hero__side-rule"></div>
-    <div class="hero__side-text">Vegan &nbsp;·&nbsp; Long-wear &nbsp;·&nbsp; 13 Shades</div>
-    <div class="hero__side-rule"></div>
-  </div>
+    <!-- Canvas: cover-fill via JS -->
+    <canvas class="hero-scrub__canvas js-hero-canvas" aria-hidden="true"></canvas>
 
-  <div class="hero__body">
-    <h1 class="hero__h1">
-      <span class="hero__line"><span class="hero__line-inner">Leave your</span></span>
-      <span class="hero__line"><span class="hero__line-inner"><em>mark.</em></span></span>
-    </h1>
-    <div class="hero__cta-mask">
-      <div class="hero__cta-inner">
+    <!-- Cinematic overlay gradient -->
+    <div class="hero-scrub__cin"></div>
+
+    <!-- Vertical side label -->
+    <div class="hero-scrub__side">
+      <div class="hero-scrub__side-rule"></div>
+      <div class="hero-scrub__side-text">Vegan &nbsp;·&nbsp; Long-wear &nbsp;·&nbsp; 13 Shades</div>
+      <div class="hero-scrub__side-rule"></div>
+    </div>
+
+    <!-- Segment 1: Brand reveal (frames 0–75) -->
+    <div class="hero-scrub__seg js-hero-seg" data-f0="0" data-f1="75">
+      <div class="hero-scrub__eyebrow">Issue No. 01 · The Color Issue · April 2026</div>
+      <h1 class="hero-scrub__h1">Pretty<br><em>Ink.</em></h1>
+    </div>
+
+    <!-- Segment 2: Product promise (frames 88–162) -->
+    <div class="hero-scrub__seg js-hero-seg" data-f0="88" data-f1="162">
+      <div class="hero-scrub__eyebrow">13 shades · Vegan · Made in Pontiac</div>
+      <h1 class="hero-scrub__h1">Leave your<br><em>mark.</em></h1>
+    </div>
+
+    <!-- Segment 3: CTA (frames 175–241) -->
+    <div class="hero-scrub__seg js-hero-seg" data-f0="175" data-f1="241">
+      <div class="hero-scrub__eyebrow">Vegan · Cruelty-Free · Three-week wear</div>
+      <h1 class="hero-scrub__h1" style="font-size:clamp(48px,8.5vw,138px)">Your color<br><em>is waiting.</em></h1>
+      <div class="hero-scrub__cta">
         <a href="shop.html" class="btn btn-ghost">Shop the ink →</a>
       </div>
+      <div class="hero-scrub__shades">
+        <span class="hero-scrub__dot" style="background:#c94040"></span>
+        <span class="hero-scrub__dot" style="background:#7b3157"></span>
+        <span class="hero-scrub__dot" style="background:#e84a7b"></span>
+        <span class="hero-scrub__dot" style="background:#e8b4b0"></span>
+        <span class="hero-scrub__dot" style="background:#f0ece2;border-color:rgba(255,255,255,.35)"></span>
+        <span class="hero-scrub__dot" style="background:#d4813a"></span>
+        <span class="hero-scrub__dot" style="background:#f7d32c"></span>
+        <span class="hero-scrub__dot" style="background:#3ab85a"></span>
+        <span class="hero-scrub__dot" style="background:#3bb8c4"></span>
+        <span class="hero-scrub__dot" style="background:#1f3b80"></span>
+        <span class="hero-scrub__dot" style="background:#6e3d8a"></span>
+        <span class="hero-scrub__dot" style="background:#4a2216"></span>
+        <span class="hero-scrub__dot" style="background:#2d2d2d"></span>
+        <span class="hero-scrub__dot-more">13 shades · from $14</span>
+      </div>
     </div>
-    <div class="hero__shades">
-      <span class="hero__dot" style="background:#c94040"></span>
-      <span class="hero__dot" style="background:#7b3157"></span>
-      <span class="hero__dot" style="background:#e84a7b"></span>
-      <span class="hero__dot" style="background:#e8b4b0"></span>
-      <span class="hero__dot" style="background:#f0ece2;border-color:rgba(255,255,255,.35)"></span>
-      <span class="hero__dot" style="background:#d4813a"></span>
-      <span class="hero__dot" style="background:#f7d32c"></span>
-      <span class="hero__dot" style="background:#3ab85a"></span>
-      <span class="hero__dot" style="background:#3bb8c4"></span>
-      <span class="hero__dot" style="background:#1f3b80"></span>
-      <span class="hero__dot" style="background:#6e3d8a"></span>
-      <span class="hero__dot" style="background:#4a2216"></span>
-      <span class="hero__dot" style="background:#2d2d2d"></span>
-      <span class="hero__dot-more">13 shades · from $14</span>
+
+    <!-- Segment progress dots -->
+    <div class="hero-scrub__progress" aria-hidden="true">
+      <span class="hero-scrub__prog-dot js-hero-dot active"></span>
+      <span class="hero-scrub__prog-dot js-hero-dot"></span>
+      <span class="hero-scrub__prog-dot js-hero-dot"></span>
     </div>
+
+    <!-- Scroll nudge fades after first few frames -->
+    <div class="hero-scrub__scroll-hint js-hero-hint">Scroll</div>
+
   </div>
 </section>
 
@@ -1284,8 +1315,13 @@ function tick(){
 tick(); setInterval(tick,1000);
 
 /* ── MASTHEAD SCROLL ── */
-const mast = document.querySelector('.js-mast');
-window.addEventListener('scroll',()=>{ mast?.classList.toggle('scrolled',window.scrollY>60); },{passive:true});
+/* Stay "open" dark while the hero scrub canvas is the dominant visual */
+const mast     = document.querySelector('.js-mast');
+const heroSect = document.querySelector('#hero');
+window.addEventListener('scroll',()=>{
+  const threshold = heroSect ? heroSect.offsetHeight - window.innerHeight * 0.6 : 60;
+  mast?.classList.toggle('scrolled', window.scrollY > threshold);
+},{passive:true});
 
 /* ── CURSOR ── */
 const dot=document.querySelector('.js-dot');
@@ -1303,7 +1339,7 @@ if(!coarse && dot && ring && glow){
     glow.style.transform=`translate3d(${gx}px,${gy}px,0)`;
     requestAnimationFrame(loop);
   })();
-  document.querySelectorAll('a,button,input,.card,.sig__img').forEach(el=>{
+  document.querySelectorAll('a,button,input,.card,.sig__img,.hero-scrub__dot').forEach(el=>{
     el.addEventListener('mouseenter',()=>ring.classList.add('on'));
     el.addEventListener('mouseleave',()=>ring.classList.remove('on'));
   });
@@ -1352,34 +1388,84 @@ function initScroll(){
   ScrollTrigger.refresh();
 }
 
-/* ── HERO ENTRANCE — masked line reveal ── */
-function initHeroEntrance(){
-  const lines   = document.querySelectorAll('.hero__line-inner');
-  const eyebrow = document.querySelector('.hero__eyebrow-inner');
-  const cta     = document.querySelector('.hero__cta-inner');
-  const dots    = document.querySelectorAll('.hero__dot');
-  const label   = document.querySelector('.hero__dot-more');
+/* ── HERO SCROLL SCRUB ── */
+function initHeroScrub(){
+  const section = document.querySelector('#hero');
+  const canvas  = document.querySelector('.js-hero-canvas');
+  if(!section || !canvas || reduced) return;
 
-  if(reduced || typeof gsap==='undefined'){
-    [...lines,cta,...dots,label].forEach(el=>{ if(el){ el.style.transform='scale(1) translateY(0)'; el.style.opacity='1'; } });
-    return;
+  const ctx   = canvas.getContext('2d');
+  const TOTAL = 241; // hero.mp4 at 15fps = 241 frames
+  const frames = [];
+  let loopActive = false;
+
+  /* Size canvas to cover full viewport */
+  function sizeCanvas(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', sizeCanvas, {passive:true});
+  sizeCanvas();
+
+  /* Preload all frames */
+  for(let i = 1; i <= TOTAL; i++){
+    const img = new Image();
+    img.src = `assets/hero-frames/frame_${String(i).padStart(4,'0')}.webp`;
+    frames.push(img);
   }
 
-  const tl = gsap.timeline({defaults:{ease:'expo.out'}});
-  tl.to(eyebrow, {y:'0%', duration:.9},            0)
-    .to(lines,   {y:'0%', duration:1.1, stagger:.1}, .1)
-    .to(cta,     {y:'0%', duration:.95},             .42)
-    /* staggered elastic pop for each dot */
-    .to(dots,    {scale:1, duration:.7, stagger:.055, ease:'elastic.out(1,.6)'}, .7)
-    .to(label,   {opacity:1, duration:.5, ease:'power2.out'},                   '>-.15');
+  /* Overlays */
+  const segs = Array.from(document.querySelectorAll('.js-hero-seg'));
+  const dots = Array.from(document.querySelectorAll('.js-hero-dot'));
+  const hint = document.querySelector('.js-hero-hint');
+  let hintHidden = false;
 
-  /* after entrance: slow rolling wave, loops every 5 s */
-  tl.call(()=>{
-    gsap.to(dots, {
-      y: -5, duration:.35, stagger:{each:.07, repeat:-1, yoyo:true, repeatDelay:4.6},
-      ease:'power2.inOut'
+  function updateOverlays(f){
+    segs.forEach(s=>{
+      s.classList.toggle('visible', f >= +s.dataset.f0 && f <= +s.dataset.f1);
     });
-  }, null, '>+.4');
+    const seg = f < 82 ? 0 : f < 168 ? 1 : 2;
+    dots.forEach((d,i)=>d.classList.toggle('active', i===seg));
+    if(hint && !hintHidden && f > 6){ hintHidden=true; hint.classList.add('hidden'); }
+  }
+
+  /* Scroll → target frame — cover-crop draw */
+  function getTarget(){
+    const rect   = section.getBoundingClientRect();
+    const travel = section.offsetHeight - window.innerHeight;
+    const p      = Math.max(0, Math.min(1, -rect.top / travel));
+    return p * (TOTAL - 1);
+  }
+
+  function draw(f){
+    const i   = Math.max(0, Math.min(TOTAL-1, Math.round(f)));
+    const img = frames[i];
+    if(!img || !img.complete || !img.naturalWidth) return;
+    const vw = canvas.width, vh = canvas.height;
+    const vr = vw / vh, ir = img.naturalWidth / img.naturalHeight;
+    let sx, sy, sw, sh;
+    if(vr > ir){ sw = img.naturalWidth; sh = sw/vr; sx=0; sy=(img.naturalHeight-sh)/2; }
+    else        { sh = img.naturalHeight; sw = sh*vr; sx=(img.naturalWidth-sw)/2; sy=0; }
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, vw, vh);
+  }
+
+  let cur = 0;
+  function loop(){
+    const target = getTarget();
+    const delta  = target - cur;
+    if(Math.abs(delta) > 0.015){ cur += delta * 0.1; draw(cur); updateOverlays(Math.round(cur)); }
+    requestAnimationFrame(loop);
+  }
+
+  function start(){
+    if(loopActive) return;
+    loopActive = true;
+    draw(0); updateOverlays(0); loop();
+  }
+
+  if(frames[0].complete && frames[0].naturalWidth > 0) start();
+  else frames[0].addEventListener('load', start, {once:true});
+  setTimeout(start, 2500);
 }
 
 /* ── CANVAS SCROLL SCRUB ── */
@@ -1477,58 +1563,8 @@ function initScrub(){
   setTimeout(start, 3000); // guaranteed fallback
 }
 
-/* ── BOOT ── */
-/* ── VIDEO LOOP CONTROLLER ── */
-function initVideoLoop(){
-  const vid  = document.querySelector('.hero__media video');
-  const fade = document.querySelector('.hero__loop-fade');
-  if(!vid || !fade) return;
-
-  vid.playbackRate = 0.85;
-  vid.addEventListener('canplay', ()=>{ vid.currentTime = 0; }, {once:true});
-
-  /* How many seconds before the end to begin fading out */
-  const TRIGGER = 2.8;
-  let triggered = false;
-
-  /* timeupdate: only used to DETECT the trigger point — GSAP does the actual animation */
-  vid.addEventListener('timeupdate', ()=>{
-    if(!vid.duration || triggered) return;
-    const timeLeft = vid.duration - vid.currentTime;
-
-    if(timeLeft < TRIGGER){
-      triggered = true;
-      /* Fade out: duration matches remaining time exactly so it hits black on the last frame */
-      gsap.to(fade, {
-        opacity: 1,
-        duration: timeLeft,
-        ease: 'power2.in'   /* slow start → accelerates into black = cinematic burn */
-      });
-    }
-  });
-
-  vid.addEventListener('ended', ()=>{
-    /* Kill any in-progress tween, snap to solid black at the cut */
-    gsap.killTweensOf(fade);
-    gsap.set(fade, { opacity: 1 });
-
-    vid.currentTime = 0;
-    vid.play();
-    triggered = false;
-
-    /* Brief hold in black (~3 frames), then elegant reveal */
-    gsap.to(fade, {
-      opacity: 0,
-      duration: 2.2,
-      ease: 'power2.out',  /* fast initial clear → glides to fully transparent */
-      delay: 0.08
-    });
-  });
-}
-
 boot(()=>{
-  initVideoLoop();
-  initHeroEntrance();
+  initHeroScrub();
   initReveals();
   initScroll();
   initScrub();
