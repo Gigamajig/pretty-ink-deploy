@@ -211,22 +211,34 @@ body::after {
 .btn-ghost { background:transparent; color:var(--cream); border:1px solid rgba(244,240,232,.38); letter-spacing:.22em; }
 .btn-ghost:hover { border-color:rgba(244,240,232,.85); background:rgba(244,240,232,.05); }
 
-/* ─────────── HERO ─────────── */
-.hero {
-  position:relative; height:100svh; min-height:640px;
-  overflow:hidden; color:var(--cream); background:#040404;
+/* ─────────── HERO SCROLL SCRUB ─────────── */
+.hero-scrub {
+  position:relative; height:350vh; background:#040404;
 }
-.hero__media {
-  position:absolute; inset:0; z-index:0;
+.hero-scrub__pin {
+  position:sticky; top:0;
+  height:100svh; min-height:640px;
+  overflow:hidden; color:var(--cream);
 }
-.hero__media img {
-  position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; object-position:center 35%;
-  transform:scale(1.07);
-  animation:hZoom 20s ease-out forwards;
-  filter:contrast(1.08) saturate(1.18) brightness(0.78);
+.hero-scrub__canvas {
+  position:absolute; inset:0; z-index:0; display:block;
+  width:100%; height:100%;
 }
-@keyframes hZoom { from{transform:scale(1.07)} to{transform:scale(1.00)} }
+/* Gold rule at bottom of pinned hero */
+.hero-scrub__pin::after {
+  content:""; position:absolute; bottom:0; left:0; right:0;
+  height:2px; background:var(--gold); z-index:6;
+}
+/* Loading bar — fades out when frames ready */
+.hero-scrub__load {
+  position:absolute; bottom:2px; left:0; right:0; z-index:10;
+  height:2px; background:rgba(244,240,232,.08);
+  transition:opacity .8s var(--e);
+}
+.hero-scrub__load-bar {
+  display:block; height:100%; width:0%;
+  background:var(--blush); transition:width .15s linear;
+}
 /* Cinematic overlay: heavy left text zone, light right */
 .hero__cin {
   position:absolute; inset:0; z-index:2; pointer-events:none;
@@ -759,11 +771,10 @@ body::after {
   </div>
 </header>
 
-<!-- ══════════ HERO ══════════ -->
-<section class="hero" id="hero">
-  <div class="hero__media">
-    <img src="assets/lifestyle/salon.jpg" alt="" fetchpriority="high">
-  </div>
+<!-- ══════════ HERO SCROLL SCRUB ══════════ -->
+<section class="hero-scrub" id="hero">
+  <div class="hero-scrub__pin js-hero-pin">
+  <canvas class="hero-scrub__canvas js-hero-canvas"></canvas>
   <div class="hero__cin"></div>
 
   <div class="hero__side">
@@ -799,6 +810,10 @@ body::after {
       <span class="hero__dot-more">13 shades · from $14</span>
     </div>
   </div>
+  <div class="hero-scrub__load js-hero-load">
+    <span class="hero-scrub__load-bar js-hero-load-bar"></span>
+  </div>
+  </div><!-- /hero-scrub__pin -->
 </section>
 
 <!-- MARQUEE -->
@@ -1175,7 +1190,7 @@ if(!coarse && dot && ring && glow){
   });
 
   /* Dark-zone detection — flip ring to light when over dark sections */
-  const darkSections = document.querySelectorAll('.hero,.chapter--dark,.grid-section--dark,.founder,.cta,.footer');
+  const darkSections = document.querySelectorAll('.hero-scrub__pin,.chapter--dark,.grid-section--dark,.founder,.cta,.footer');
   darkSections.forEach(sec=>{
     sec.addEventListener('mouseenter',()=>ring.classList.add('dark-zone'));
     sec.addEventListener('mouseleave',()=>ring.classList.remove('dark-zone'));
@@ -1251,8 +1266,75 @@ function initHeroEntrance(){
   },null,'>+.3');
 }
 
+/* ── HERO SCROLL SCRUB — canvas LERP frame playback ── */
+function initHeroScrub(){
+  const section  = document.querySelector('.hero-scrub');
+  const pin      = document.querySelector('.js-hero-pin');
+  const canvas   = document.querySelector('.js-hero-canvas');
+  const loadEl   = document.querySelector('.js-hero-load');
+  const loadBar  = document.querySelector('.js-hero-load-bar');
+  if(!canvas || !section || !pin) { initHeroEntrance(); return; }
+
+  const ctx = canvas.getContext('2d');
+  const TOTAL = 121;
+  const frames = new Array(TOTAL).fill(null);
+  let loaded = 0, cur = 0, target = 0, entranceFired = false;
+
+  function resize(){
+    canvas.width  = pin.offsetWidth;
+    canvas.height = pin.offsetHeight;
+    drawFrame(Math.round(cur));
+  }
+
+  function drawFrame(idx){
+    const img = frames[Math.max(0, Math.min(TOTAL-1, idx))];
+    if(!img) return;
+    const vw=canvas.width, vh=canvas.height;
+    const ar=img.naturalWidth/img.naturalHeight;
+    let sw=vw, sh=sw/ar;
+    if(sh<vh){ sh=vh; sw=sh*ar; }
+    const sx=(vw-sw)/2, sy=(vh-sh)/2;
+    ctx.clearRect(0,0,vw,vh);
+    ctx.drawImage(img,sx,sy,sw,sh);
+  }
+
+  (function raf(){
+    cur += (target-cur)*0.1;
+    drawFrame(Math.round(cur));
+    requestAnimationFrame(raf);
+  })();
+
+  /* Preload all frames */
+  for(let i=0;i<TOTAL;i++){
+    const img=new Image();
+    img.src=`assets/hero-frames/frame_${String(i+1).padStart(4,'0')}.webp`;
+    img.onload=()=>{
+      frames[i]=img;
+      loaded++;
+      if(loadBar) loadBar.style.width=(loaded/TOTAL*100)+'%';
+      if(loaded===1){ resize(); }
+      if(loaded===TOTAL){
+        if(loadEl){ loadEl.style.opacity='0'; setTimeout(()=>{ loadEl.style.display='none'; },900); }
+      }
+      if(loaded>=15 && !entranceFired){ entranceFired=true; initHeroEntrance(); }
+    };
+    img.onerror=()=>{ loaded++; };
+  }
+
+  /* Scroll → update target frame */
+  window.addEventListener('scroll',()=>{
+    const scrollable = section.offsetHeight - pin.offsetHeight;
+    const scrolled   = Math.max(0, -section.getBoundingClientRect().top);
+    const progress   = Math.min(1, scrolled/scrollable);
+    target = progress*(TOTAL-1);
+  },{passive:true});
+
+  window.addEventListener('resize', resize);
+  resize();
+}
+
 boot(()=>{
-  initHeroEntrance();
+  initHeroScrub();
   initReveals();
   initScroll();
 });
