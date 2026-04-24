@@ -1307,7 +1307,7 @@ function initHeroScrub(){
   /* Preload all frames */
   for(let i=0;i<TOTAL;i++){
     const img=new Image();
-    img.src=`assets/hero-frames/frame_${String(i+1).padStart(4,'0')}.webp`;
+    img.src=`assets/hero-frames/frame_${String(i+1).padStart(4,'0')}.webp?v=2`;
     img.onload=()=>{
       frames[i]=img;
       loaded++;
