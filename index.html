@@ -213,7 +213,7 @@ body::after {
 
 /* ─────────── HERO SCROLL SCRUB ─────────── */
 .hero-scrub {
-  position:relative; height:350vh; background:#040404;
+  position:relative; height:220vh; background:#040404;
 }
 .hero-scrub__pin {
   position:sticky; top:0;
@@ -239,22 +239,22 @@ body::after {
   display:block; height:100%; width:0%;
   background:var(--blush); transition:width .15s linear;
 }
-/* Cinematic overlay: heavy left text zone, light right */
+/* Cinematic overlay: light vignette, text-zone shadow */
 .hero__cin {
   position:absolute; inset:0; z-index:2; pointer-events:none;
   background:
     linear-gradient(to bottom,
-      rgba(4,4,4,.72) 0%,
-      rgba(4,4,4,.06) 28%,
-      rgba(4,4,4,.82) 62%,
-      rgba(4,4,4,.98) 100%
+      rgba(4,4,4,.22) 0%,
+      transparent 18%,
+      transparent 52%,
+      rgba(4,4,4,.60) 78%,
+      rgba(4,4,4,.82) 100%
     ),
     linear-gradient(96deg,
-      rgba(4,4,4,.96) 0%,
-      rgba(4,4,4,.90) 26%,
-      rgba(4,4,4,.56) 44%,
-      rgba(4,4,4,.16) 62%,
-      transparent 100%
+      rgba(4,4,4,.72) 0%,
+      rgba(4,4,4,.52) 22%,
+      rgba(4,4,4,.18) 42%,
+      transparent 62%
     );
 }
 /* Text-protection radial behind body */
