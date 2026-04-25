@@ -290,7 +290,7 @@ body::after {
 /* Headline */
 .hero__h1 {
   font-family:var(--fd); font-style:italic; font-weight:300;
-  font-size:clamp(72px,12.5vw,210px); line-height:.86; letter-spacing:-.048em;
+  font-size:clamp(44px,6vw,96px); line-height:.88; letter-spacing:-.048em;
   margin-bottom:clamp(28px,3.8vw,48px); color:#fff;
 }
 .hero__line { display:block; overflow:hidden; }
@@ -1298,8 +1298,8 @@ function initHeroScrub(){
     const ar = img.naturalWidth / img.naturalHeight;
     const far = vw / vh;
     let sw, sh;
-    if(ar > far){ sw = vw; sh = sw / ar; }
-    else { sh = vh; sw = sh * ar; }
+    if(ar > far){ sh = vh; sw = sh * ar; }
+    else { sw = vw; sh = sw / ar; if(sh < vh){ sh = vh; sw = sh * ar; } }
     const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
     ctx.clearRect(0, 0, vw, vh);
     ctx.drawImage(img, sx, sy, sw, sh);
