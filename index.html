@@ -1295,11 +1295,12 @@ function initHeroScrub(){
     const img = frames[Math.max(0, Math.min(TOTAL-1, idx))];
     if(!img) return;
     const vw = cssW, vh = cssH;
-    const ar = img.naturalWidth / img.naturalHeight;
-    const far = vw / vh;
-    let sw, sh;
-    if(ar > far){ sh = vh; sw = sh * ar; }
-    else { sw = vw; sh = sw / ar; if(sh < vh){ sh = vh; sw = sh * ar; } }
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    const ar = nw / nh;
+    /* Contain-fit, never upscale past native resolution */
+    let sw = Math.min(vw, nw);
+    let sh = sw / ar;
+    if(sh > vh){ sh = Math.min(vh, nh); sw = sh * ar; }
     const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
     ctx.clearRect(0, 0, vw, vh);
     ctx.drawImage(img, sx, sy, sw, sh);
