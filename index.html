@@ -1279,23 +1279,28 @@ function initHeroScrub(){
   const TOTAL = 145;
   const frames = new Array(TOTAL).fill(null);
   let loaded = 0, cur = 0, target = 0, entranceFired = false;
+  let cssW = 0, cssH = 0;
 
   function resize(){
-    canvas.width  = pin.offsetWidth;
-    canvas.height = pin.offsetHeight;
+    const dpr = window.devicePixelRatio || 1;
+    cssW = pin.offsetWidth;
+    cssH = pin.offsetHeight;
+    canvas.width  = cssW * dpr;
+    canvas.height = cssH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawFrame(Math.round(cur));
   }
 
   function drawFrame(idx){
     const img = frames[Math.max(0, Math.min(TOTAL-1, idx))];
     if(!img) return;
-    const vw=canvas.width, vh=canvas.height;
-    const ar=img.naturalWidth/img.naturalHeight;
-    let sw=vw, sh=sw/ar;
-    if(sh<vh){ sh=vh; sw=sh*ar; }
-    const sx=(vw-sw)/2, sy=(vh-sh)/2;
-    ctx.clearRect(0,0,vw,vh);
-    ctx.drawImage(img,sx,sy,sw,sh);
+    const vw = cssW, vh = cssH;
+    const ar = img.naturalWidth / img.naturalHeight;
+    let sw = vw, sh = sw / ar;
+    if(sh < vh){ sh = vh; sw = sh * ar; }
+    const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+    ctx.clearRect(0, 0, vw, vh);
+    ctx.drawImage(img, sx, sy, sw, sh);
   }
 
   (function raf(){
