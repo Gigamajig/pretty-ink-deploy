@@ -1276,7 +1276,7 @@ function initHeroScrub(){
   if(!canvas || !section || !pin) { initHeroEntrance(); return; }
 
   const ctx = canvas.getContext('2d');
-  const TOTAL = 121;
+  const TOTAL = 145;
   const frames = new Array(TOTAL).fill(null);
   let loaded = 0, cur = 0, target = 0, entranceFired = false;
 
@@ -1307,7 +1307,7 @@ function initHeroScrub(){
   /* Preload all frames */
   for(let i=0;i<TOTAL;i++){
     const img=new Image();
-    img.src=`assets/hero-frames/frame_${String(i+1).padStart(4,'0')}.webp?v=3`;
+    img.src=`assets/hero-frames/frame_${String(i+1).padStart(4,'0')}.webp?v=4`;
     img.onload=()=>{
       frames[i]=img;
       loaded++;
