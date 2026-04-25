@@ -1296,8 +1296,10 @@ function initHeroScrub(){
     if(!img) return;
     const vw = cssW, vh = cssH;
     const ar = img.naturalWidth / img.naturalHeight;
-    let sw = vw, sh = sw / ar;
-    if(sh < vh){ sh = vh; sw = sh * ar; }
+    const far = vw / vh;
+    let sw, sh;
+    if(ar > far){ sw = vw; sh = sw / ar; }
+    else { sh = vh; sw = sh * ar; }
     const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
     ctx.clearRect(0, 0, vw, vh);
     ctx.drawImage(img, sx, sy, sw, sh);
