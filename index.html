@@ -184,9 +184,9 @@ body::after {
 .mast__right {
   display:flex; align-items:center; gap:24px;
   font-family:var(--fm); font-size:9px; letter-spacing:.25em; text-transform:uppercase;
-  color:rgba(244,240,232,.85);
+  font-weight:600; color:rgba(244,240,232,1);
 }
-.mast.scrolled .mast__right { color:rgba(12,12,12,.45); }
+.mast.scrolled .mast__right { color:rgba(12,12,12,.65); }
 .mast__links { display:flex; gap:20px; }
 .mast__links a { transition:opacity .25s; }
 .mast__links a:hover { opacity:.55; }
@@ -314,8 +314,8 @@ body::after {
 }
 @media (pointer:coarse){ .hero__dot { cursor:pointer; } }
 .hero__dot-more {
-  font-family:var(--fm); font-size:9px; letter-spacing:.15em;
-  color:rgba(244,240,232,.55); margin-left:6px; opacity:0;
+  font-family:var(--fm); font-size:9px; letter-spacing:.15em; font-weight:600;
+  color:rgba(244,240,232,.92); margin-left:6px; opacity:0;
 }
 @media (max-width:900px){
   .hero__body { max-width:100%; }
