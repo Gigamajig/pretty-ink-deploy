@@ -1342,7 +1342,7 @@ function initHeroScrub(){
   for(let i = 0; i < TOTAL; i++){
     const img = new Image();
     const n   = String(i + 1).padStart(4, '0');
-    img.src   = `assets/frames/frame_${n}.webp?v=2`;
+    img.src   = `assets/frames/frame_${n}.webp?v=3`;
     img.onload = ()=>{
       loaded++;
       if(loadBar) loadBar.style.width = (loaded / TOTAL * 100) + '%';
