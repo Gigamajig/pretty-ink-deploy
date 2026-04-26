@@ -796,7 +796,7 @@ body::after {
 <section class="hero-scrub" id="hero">
   <div class="hero-scrub__pin js-hero-pin">
   <div class="hero-scrub__frame">
-  <canvas class="hero-scrub__video js-hero-canvas" width="1280" height="720"></canvas>
+  <canvas class="hero-scrub__video js-hero-canvas" width="1920" height="1080"></canvas>
   <div class="hero__cin"></div>
 
   <div class="hero__side">
@@ -1283,6 +1283,24 @@ function initHeroScrub(){
   if(!canvas) return;
 
   const ctx    = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  /* Size canvas buffer to actual display pixels for sharpness */
+  function fitCanvas(){
+    const dpr = window.devicePixelRatio || 1;
+    const w   = canvas.clientWidth  * dpr;
+    const h   = canvas.clientHeight * dpr;
+    if(canvas.width !== w || canvas.height !== h){
+      canvas.width  = w;
+      canvas.height = h;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+    }
+  }
+  fitCanvas();
+  window.addEventListener('resize', fitCanvas, {passive:true});
+
   const TOTAL  = 121;
   const frames = new Array(TOTAL);
   let loaded   = 0;
