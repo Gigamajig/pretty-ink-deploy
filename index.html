@@ -1277,20 +1277,36 @@ function initHeroScrub(){
   const loadEl  = document.querySelector('.js-hero-load');
   if(!section || !pin) { initHeroEntrance(); return; }
 
-  /* Text entrance fires immediately after boot, no video dependency */
   initHeroEntrance();
   if(loadEl) loadEl.style.display = 'none';
 
   if(!video) return;
 
+  let targetT  = 0;
+  let currentT = 0;
+  let rafId    = null;
+  const LERP   = 0.10; // smoothing — lower = more lag, feels more cinematic
+
+  function scrubTick(){
+    const diff = targetT - currentT;
+    if(Math.abs(diff) > 0.0008){
+      currentT += diff * LERP;
+      video.currentTime = currentT;
+      rafId = requestAnimationFrame(scrubTick);
+    } else {
+      currentT = targetT;
+      video.currentTime = currentT;
+      rafId = null;
+    }
+  }
+
   window.addEventListener('scroll',()=>{
     if(!video.duration) return;
     const scrollable = section.offsetHeight - pin.offsetHeight;
     const scrolled   = Math.max(0, -section.getBoundingClientRect().top);
-    const progress   = Math.min(1, scrolled/scrollable);
-    const t = progress * video.duration;
-    if(video.fastSeek) video.fastSeek(t);
-    else video.currentTime = t;
+    const progress   = Math.min(1, scrolled / scrollable);
+    targetT = progress * video.duration;
+    if(!rafId) rafId = requestAnimationFrame(scrubTick);
   },{passive:true});
 }
 
