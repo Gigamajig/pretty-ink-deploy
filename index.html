@@ -796,7 +796,7 @@ body::after {
 <section class="hero-scrub" id="hero">
   <div class="hero-scrub__pin js-hero-pin">
   <div class="hero-scrub__frame">
-  <video class="hero-scrub__video js-hero-video" src="assets/video/handpickup.mp4?v=2" muted playsinline preload="auto"></video>
+  <canvas class="hero-scrub__video js-hero-canvas" width="1280" height="720"></canvas>
   <div class="hero__cin"></div>
 
   <div class="hero__side">
@@ -1269,45 +1269,70 @@ function initHeroEntrance(){
   if(pin) pin.classList.add('hero-ready');
 }
 
-/* ── HERO SCROLL SCRUB — native video currentTime ── */
+/* ── HERO SCROLL SCRUB — canvas frame sequence ── */
 function initHeroScrub(){
   const section = document.querySelector('.hero-scrub');
   const pin     = document.querySelector('.js-hero-pin');
-  const video   = document.querySelector('.js-hero-video');
+  const canvas  = document.querySelector('.js-hero-canvas');
   const loadEl  = document.querySelector('.js-hero-load');
+  const loadBar = document.querySelector('.js-hero-load-bar');
   if(!section || !pin) { initHeroEntrance(); return; }
 
   initHeroEntrance();
-  if(loadEl) loadEl.style.display = 'none';
 
-  if(!video) return;
+  if(!canvas) return;
 
-  let targetT  = 0;
-  let currentT = 0;
+  const ctx    = canvas.getContext('2d');
+  const TOTAL  = 121;
+  const frames = new Array(TOTAL);
+  let loaded   = 0;
+
+  let targetP  = 0;
+  let currentP = 0;
   let rafId    = null;
-  const LERP   = 0.10; // smoothing — lower = more lag, feels more cinematic
+  const LERP   = 0.09;
 
-  function scrubTick(){
-    const diff = targetT - currentT;
-    if(Math.abs(diff) > 0.0008){
-      currentT += diff * LERP;
-      video.currentTime = currentT;
-      rafId = requestAnimationFrame(scrubTick);
+  function drawFrame(p){
+    const idx = Math.min(TOTAL - 1, Math.floor(p * TOTAL));
+    const img = frames[idx];
+    if(img && img.complete && img.naturalWidth){
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function tick(){
+    const diff = targetP - currentP;
+    if(Math.abs(diff) > 0.00015){
+      currentP += diff * LERP;
+      drawFrame(currentP);
+      rafId = requestAnimationFrame(tick);
     } else {
-      currentT = targetT;
-      video.currentTime = currentT;
+      currentP = targetP;
+      drawFrame(currentP);
       rafId = null;
     }
   }
 
   window.addEventListener('scroll',()=>{
-    if(!video.duration) return;
     const scrollable = section.offsetHeight - pin.offsetHeight;
     const scrolled   = Math.max(0, -section.getBoundingClientRect().top);
-    const progress   = Math.min(1, scrolled / scrollable);
-    targetT = progress * video.duration;
-    if(!rafId) rafId = requestAnimationFrame(scrubTick);
+    targetP = Math.min(1, scrolled / scrollable);
+    if(!rafId) rafId = requestAnimationFrame(tick);
   },{passive:true});
+
+  /* Preload all frames; show progress bar while loading */
+  for(let i = 0; i < TOTAL; i++){
+    const img = new Image();
+    const n   = String(i + 1).padStart(4, '0');
+    img.src   = `assets/frames/frame_${n}.webp`;
+    img.onload = ()=>{
+      loaded++;
+      if(loadBar) loadBar.style.width = (loaded / TOTAL * 100) + '%';
+      if(i === 0) drawFrame(0);
+      if(loaded === TOTAL && loadEl) loadEl.style.opacity = '0';
+    };
+    frames[i] = img;
+  }
 }
 
 boot(()=>{
