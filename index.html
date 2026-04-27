@@ -213,7 +213,7 @@ body::after {
 
 /* ─────────── HERO SCROLL SCRUB ─────────── */
 .hero-scrub {
-  position:relative; height:320vh; background:#040404;
+  position:relative; height:280vh; background:#040404;
 }
 .hero-scrub__pin {
   position:sticky; top:0;
@@ -1301,7 +1301,7 @@ function initHeroScrub(){
   fitCanvas();
   window.addEventListener('resize', fitCanvas, {passive:true});
 
-  const TOTAL  = 363;
+  const TOTAL  = 121;
   const frames = new Array(TOTAL);
   let loaded   = 0;
 
@@ -1342,7 +1342,7 @@ function initHeroScrub(){
   for(let i = 0; i < TOTAL; i++){
     const img = new Image();
     const n   = String(i + 1).padStart(4, '0');
-    img.src   = `assets/frames/frame_${n}.webp?v=3`;
+    img.src   = `assets/frames/frame_${n}.webp?v=4`;
     img.onload = ()=>{
       loaded++;
       if(loadBar) loadBar.style.width = (loaded / TOTAL * 100) + '%';
